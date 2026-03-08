@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.1.0 (2026-03-09)
+
+### Grievance Dictionary integration
+- Loaded Dutch Grievance Dictionary (van der Vegt et al., 2021) as additional detection layer
+- 556 Dutch and 464 English stemmed words across four friction-relevant categories: frustration, desperation, grievance, hate
+- LIWC-style prefix matching with pre-compiled regexes
+- Severity mapping from 7–10 goodness-of-fit scale to 0.3–0.9 friction severity
+- Early exit per category (max 3 matches) for bounded performance
+- Dictionary licensed CC BY 4.0, source: https://github.com/Isabellevdv/grievancedictionary
+
 ## 3.0.0 (2026-03-08)
 
 Initial public release.

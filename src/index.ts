@@ -34,6 +34,13 @@ import {
   recordTurn,
 } from "./repetition-detection";
 import { runBackgroundAnalysis } from "./background-analysis";
+import {
+  loadGrievanceDictionary,
+  matchGrievance,
+  grievanceFrictionLevel,
+  grievanceConstraints,
+  grievanceSignatureUpdates,
+} from "./grievance-matching";
 
 // ──────────────────────────────────────────────
 // Constants (overridable via config)
@@ -204,11 +211,20 @@ function assessFriction(userText: string, profile: UserProfile, lang: string): F
 
   if (maxLevel === 0 && baselineDeviation > 0.35) maxLevel = 1;
 
+  // Grievance Dictionary matching (stemmed word lists)
+  const grievanceMatches = matchGrievance(userText, lang as "nl" | "en");
+  const grievanceLevel = grievanceFrictionLevel(grievanceMatches);
+  if (grievanceLevel > maxLevel) maxLevel = grievanceLevel;
+
   const constraints = new Set<Constraint>();
   for (const entry of allMatched) {
     if (entry.severity + baselineDeviation * 0.3 > 0.3) {
       for (const c of entry.suggestedConstraints) constraints.add(c);
     }
+  }
+  // Add grievance-suggested constraints
+  for (const c of grievanceConstraints(grievanceMatches)) {
+    constraints.add(c);
   }
 
   const sigUpdates: Partial<Record<Signature, number>> = {};
@@ -232,6 +248,11 @@ function assessFriction(userText: string, profile: UserProfile, lang: string): F
           sigUpdates.helpdesk_tone = inc * 2; break;
       }
     }
+  }
+  // Merge grievance signature updates
+  const grievanceSigUpdates = grievanceSignatureUpdates(grievanceMatches);
+  for (const [sig, val] of Object.entries(grievanceSigUpdates)) {
+    sigUpdates[sig as Signature] = (sigUpdates[sig as Signature] || 0) + (val as number);
   }
 
   return {
@@ -380,6 +401,7 @@ export default {
     try {
       const entries = loadEvidence();
       logger.info(`[friction-guard] Evidence registry: ${entries.length} entries loaded`);
+      loadGrievanceDictionary(); // preload + log count
     } catch (e) {
       logger.warn("[friction-guard] Could not load evidence registry:", e);
     }

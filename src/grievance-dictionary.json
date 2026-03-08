@@ -1,0 +1,4159 @@
+{
+  "_meta": {
+    "version": "1.0.0",
+    "description": "Friction-relevant categories from the Grievance Dictionary (van der Vegt et al., 2021), Dutch and English",
+    "source": "https://github.com/Isabellevdv/grievancedictionary",
+    "license": "CC BY 4.0",
+    "categories_included": [
+      "frustration",
+      "desperation",
+      "grievance",
+      "hate"
+    ],
+    "total_nl": 556,
+    "total_en": 464,
+    "rating_scale": "7-10 (goodness-of-fit to category, 7+ threshold from original paper)",
+    "severity_mapping": "rating 7-8 → severity 0.3-0.5, 8-9 → 0.5-0.7, 9-10 → 0.7-0.9"
+  },
+  "categories": {
+    "frustration": {
+      "frictionLevel": 2,
+      "suggestedConstraints": [
+        "NO_HELPDESK",
+        "BAN_CLICHE_PHRASES"
+      ],
+      "primarySignature": "helpdesk_tone",
+      "words": {
+        "nl": [
+          {
+            "stem": "frustratie",
+            "severity": 0.9
+          },
+          {
+            "stem": "kwad",
+            "severity": 0.86
+          },
+          {
+            "stem": "verveeld",
+            "severity": 0.82
+          },
+          {
+            "stem": "uithal",
+            "severity": 0.81
+          },
+          {
+            "stem": "gefrustreerd",
+            "severity": 0.81
+          },
+          {
+            "stem": "irritatie",
+            "severity": 0.81
+          },
+          {
+            "stem": "kort lontj",
+            "severity": 0.81
+          },
+          {
+            "stem": "driftbui",
+            "severity": 0.79
+          },
+          {
+            "stem": "wanhop",
+            "severity": 0.78
+          },
+          {
+            "stem": "geirriteerd",
+            "severity": 0.76
+          },
+          {
+            "stem": "bos",
+            "severity": 0.74
+          },
+          {
+            "stem": "bedroefd",
+            "severity": 0.72
+          },
+          {
+            "stem": "woedeaanval",
+            "severity": 0.72
+          },
+          {
+            "stem": "negatief",
+            "severity": 0.7
+          },
+          {
+            "stem": "gemoeder",
+            "severity": 0.7
+          },
+          {
+            "stem": "de handdoek in de ring gooi",
+            "severity": 0.7
+          },
+          {
+            "stem": "van strek",
+            "severity": 0.7
+          },
+          {
+            "stem": "roodzien",
+            "severity": 0.68
+          },
+          {
+            "stem": "vervel",
+            "severity": 0.68
+          },
+          {
+            "stem": "teleurgesteld",
+            "severity": 0.67
+          },
+          {
+            "stem": "ongeduld",
+            "severity": 0.67
+          },
+          {
+            "stem": "woest",
+            "severity": 0.66
+          },
+          {
+            "stem": "benadruk",
+            "severity": 0.66
+          },
+          {
+            "stem": "stress",
+            "severity": 0.66
+          },
+          {
+            "stem": "gespann",
+            "severity": 0.66
+          },
+          {
+            "stem": "lastpak",
+            "severity": 0.66
+          },
+          {
+            "stem": "stor",
+            "severity": 0.65
+          },
+          {
+            "stem": "gestrest",
+            "severity": 0.65
+          },
+          {
+            "stem": "griev",
+            "severity": 0.65
+          },
+          {
+            "stem": "uitbarst",
+            "severity": 0.63
+          },
+          {
+            "stem": "tran",
+            "severity": 0.63
+          },
+          {
+            "stem": "ongeluk",
+            "severity": 0.62
+          },
+          {
+            "stem": "ongelukk",
+            "severity": 0.62
+          },
+          {
+            "stem": "prikkel",
+            "severity": 0.61
+          },
+          {
+            "stem": "hopelos",
+            "severity": 0.6
+          },
+          {
+            "stem": "machtelos",
+            "severity": 0.6
+          },
+          {
+            "stem": "geergerd",
+            "severity": 0.59
+          },
+          {
+            "stem": "verdriet",
+            "severity": 0.59
+          },
+          {
+            "stem": "ongenoeg",
+            "severity": 0.59
+          },
+          {
+            "stem": "patstell",
+            "severity": 0.57
+          },
+          {
+            "stem": "spanning",
+            "severity": 0.57
+          },
+          {
+            "stem": "problem",
+            "severity": 0.57
+          },
+          {
+            "stem": "weglop",
+            "severity": 0.57
+          },
+          {
+            "stem": "ergernis",
+            "severity": 0.56
+          },
+          {
+            "stem": "gevoel",
+            "severity": 0.56
+          },
+          {
+            "stem": "droefheid",
+            "severity": 0.56
+          },
+          {
+            "stem": "opgewond",
+            "severity": 0.55
+          },
+          {
+            "stem": "de hop verliez",
+            "severity": 0.55
+          },
+          {
+            "stem": "negativiteit",
+            "severity": 0.54
+          },
+          {
+            "stem": "woedend",
+            "severity": 0.54
+          },
+          {
+            "stem": "woed",
+            "severity": 0.54
+          },
+          {
+            "stem": "huild",
+            "severity": 0.54
+          },
+          {
+            "stem": "ontevred",
+            "severity": 0.54
+          },
+          {
+            "stem": "verontrust",
+            "severity": 0.53
+          },
+          {
+            "stem": "agressie",
+            "severity": 0.53
+          },
+          {
+            "stem": "pijn",
+            "severity": 0.51
+          },
+          {
+            "stem": "beschuld",
+            "severity": 0.5
+          },
+          {
+            "stem": "kom op",
+            "severity": 0.5
+          },
+          {
+            "stem": "huil",
+            "severity": 0.5
+          },
+          {
+            "stem": "verdomd",
+            "severity": 0.5
+          },
+          {
+            "stem": "gevoelen",
+            "severity": 0.5
+          },
+          {
+            "stem": "opspann",
+            "severity": 0.5
+          },
+          {
+            "stem": "teleurstell",
+            "severity": 0.47
+          },
+          {
+            "stem": "ontslag nem",
+            "severity": 0.47
+          },
+          {
+            "stem": "terugtrek",
+            "severity": 0.47
+          },
+          {
+            "stem": "godverdomm",
+            "severity": 0.47
+          },
+          {
+            "stem": "opgev",
+            "severity": 0.46
+          },
+          {
+            "stem": "agressies",
+            "severity": 0.46
+          },
+          {
+            "stem": "temperament",
+            "severity": 0.46
+          },
+          {
+            "stem": "moeilijk",
+            "severity": 0.45
+          },
+          {
+            "stem": "angst",
+            "severity": 0.45
+          },
+          {
+            "stem": "niet tevred",
+            "severity": 0.45
+          },
+          {
+            "stem": "misluk",
+            "severity": 0.45
+          },
+          {
+            "stem": "pijn doen",
+            "severity": 0.44
+          },
+          {
+            "stem": "emoties",
+            "severity": 0.44
+          },
+          {
+            "stem": "lijd",
+            "severity": 0.43
+          },
+          {
+            "stem": "beklag",
+            "severity": 0.43
+          },
+          {
+            "stem": "radelos",
+            "severity": 0.43
+          },
+          {
+            "stem": "schud",
+            "severity": 0.43
+          },
+          {
+            "stem": "crisis",
+            "severity": 0.42
+          },
+          {
+            "stem": "negativism",
+            "severity": 0.42
+          },
+          {
+            "stem": "oner",
+            "severity": 0.42
+          },
+          {
+            "stem": "verslag",
+            "severity": 0.42
+          },
+          {
+            "stem": "klag",
+            "severity": 0.41
+          },
+          {
+            "stem": "rustelos",
+            "severity": 0.41
+          },
+          {
+            "stem": "ontploff",
+            "severity": 0.39
+          },
+          {
+            "stem": "escalatie",
+            "severity": 0.39
+          },
+          {
+            "stem": "druk",
+            "severity": 0.39
+          },
+          {
+            "stem": "in de war",
+            "severity": 0.38
+          },
+          {
+            "stem": "verward",
+            "severity": 0.38
+          },
+          {
+            "stem": "schuld gev",
+            "severity": 0.38
+          },
+          {
+            "stem": "ontzet",
+            "severity": 0.38
+          },
+          {
+            "stem": "nijdig",
+            "severity": 0.38
+          },
+          {
+            "stem": "hulpelos",
+            "severity": 0.37
+          },
+          {
+            "stem": "tegenhoud",
+            "severity": 0.37
+          },
+          {
+            "stem": "aanstot nem",
+            "severity": 0.37
+          },
+          {
+            "stem": "onwil",
+            "severity": 0.36
+          },
+          {
+            "stem": "eind van latijn",
+            "severity": 0.36
+          },
+          {
+            "stem": "verbijster",
+            "severity": 0.35
+          },
+          {
+            "stem": "ontgoocheld",
+            "severity": 0.35
+          },
+          {
+            "stem": "somber",
+            "severity": 0.35
+          },
+          {
+            "stem": "stemming",
+            "severity": 0.35
+          },
+          {
+            "stem": "gewelddad",
+            "severity": 0.35
+          },
+          {
+            "stem": "ongemak",
+            "severity": 0.34
+          },
+          {
+            "stem": "rancuneus",
+            "severity": 0.34
+          },
+          {
+            "stem": "verbitterd",
+            "severity": 0.34
+          },
+          {
+            "stem": "geschokt",
+            "severity": 0.34
+          },
+          {
+            "stem": "furor",
+            "severity": 0.33
+          },
+          {
+            "stem": "opkropp",
+            "severity": 0.33
+          },
+          {
+            "stem": "faillissement",
+            "severity": 0.33
+          },
+          {
+            "stem": "spijt hebb",
+            "severity": 0.33
+          },
+          {
+            "stem": "bever",
+            "severity": 0.33
+          },
+          {
+            "stem": "onderdruk",
+            "severity": 0.33
+          },
+          {
+            "stem": "jaloer",
+            "severity": 0.32
+          },
+          {
+            "stem": "pijn sensatie",
+            "severity": 0.32
+          },
+          {
+            "stem": "doodsangst",
+            "severity": 0.32
+          },
+          {
+            "stem": "opbouw",
+            "severity": 0.32
+          },
+          {
+            "stem": "aanval",
+            "severity": 0.3
+          },
+          {
+            "stem": "consternatie",
+            "severity": 0.3
+          },
+          {
+            "stem": "geweigerd",
+            "severity": 0.3
+          },
+          {
+            "stem": "herhal",
+            "severity": 0.3
+          },
+          {
+            "stem": "negatief gelad",
+            "severity": 0.3
+          },
+          {
+            "stem": "niet-starter",
+            "severity": 0.3
+          },
+          {
+            "stem": "verstor",
+            "severity": 0.3
+          },
+          {
+            "stem": "kleinziel",
+            "severity": 0.3
+          },
+          {
+            "stem": "omvall",
+            "severity": 0.3
+          }
+        ],
+        "en": [
+          {
+            "stem": "frustrat",
+            "severity": 0.9
+          },
+          {
+            "stem": "piss off",
+            "severity": 0.86
+          },
+          {
+            "stem": "lash out",
+            "severity": 0.81
+          },
+          {
+            "stem": "short fuse",
+            "severity": 0.81
+          },
+          {
+            "stem": "angri",
+            "severity": 0.79
+          },
+          {
+            "stem": "despair",
+            "severity": 0.78
+          },
+          {
+            "stem": "annoy",
+            "severity": 0.76
+          },
+          {
+            "stem": "tantrum",
+            "severity": 0.75
+          },
+          {
+            "stem": "irrit",
+            "severity": 0.73
+          },
+          {
+            "stem": "aggriev",
+            "severity": 0.72
+          },
+          {
+            "stem": "exasper",
+            "severity": 0.7
+          },
+          {
+            "stem": "snappish",
+            "severity": 0.7
+          },
+          {
+            "stem": "throw in the towel",
+            "severity": 0.7
+          },
+          {
+            "stem": "vex",
+            "severity": 0.7
+          },
+          {
+            "stem": "stress",
+            "severity": 0.69
+          },
+          {
+            "stem": "problem",
+            "severity": 0.69
+          },
+          {
+            "stem": "see red",
+            "severity": 0.68
+          },
+          {
+            "stem": "impati",
+            "severity": 0.68
+          },
+          {
+            "stem": "walk away",
+            "severity": 0.67
+          },
+          {
+            "stem": "upset",
+            "severity": 0.67
+          },
+          {
+            "stem": "roil",
+            "severity": 0.67
+          },
+          {
+            "stem": "furious",
+            "severity": 0.66
+          },
+          {
+            "stem": "pain in the ass",
+            "severity": 0.66
+          },
+          {
+            "stem": "outburst",
+            "severity": 0.63
+          },
+          {
+            "stem": "tear",
+            "severity": 0.63
+          },
+          {
+            "stem": "anger",
+            "severity": 0.63
+          },
+          {
+            "stem": "unhappi",
+            "severity": 0.62
+          },
+          {
+            "stem": "ire",
+            "severity": 0.62
+          },
+          {
+            "stem": "piss",
+            "severity": 0.61
+          },
+          {
+            "stem": "disappoint",
+            "severity": 0.6
+          },
+          {
+            "stem": "hopeless",
+            "severity": 0.59
+          },
+          {
+            "stem": "distress",
+            "severity": 0.59
+          },
+          {
+            "stem": "powerless",
+            "severity": 0.59
+          },
+          {
+            "stem": "irk",
+            "severity": 0.59
+          },
+          {
+            "stem": "displeasur",
+            "severity": 0.59
+          },
+          {
+            "stem": "tens",
+            "severity": 0.58
+          },
+          {
+            "stem": "irat",
+            "severity": 0.58
+          },
+          {
+            "stem": "stalem",
+            "severity": 0.57
+          },
+          {
+            "stem": "disgruntl",
+            "severity": 0.57
+          },
+          {
+            "stem": "tension",
+            "severity": 0.56
+          },
+          {
+            "stem": "sad",
+            "severity": 0.56
+          },
+          {
+            "stem": "agit",
+            "severity": 0.55
+          },
+          {
+            "stem": "lose hope",
+            "severity": 0.55
+          },
+          {
+            "stem": "pain in the neck",
+            "severity": 0.54
+          },
+          {
+            "stem": "unsatisfi",
+            "severity": 0.54
+          },
+          {
+            "stem": "discont",
+            "severity": 0.53
+          },
+          {
+            "stem": "feel",
+            "severity": 0.52
+          },
+          {
+            "stem": "cri",
+            "severity": 0.52
+          },
+          {
+            "stem": "negat",
+            "severity": 0.51
+          },
+          {
+            "stem": "come on",
+            "severity": 0.5
+          },
+          {
+            "stem": "temper",
+            "severity": 0.5
+          },
+          {
+            "stem": "tens up",
+            "severity": 0.5
+          },
+          {
+            "stem": "resign",
+            "severity": 0.47
+          },
+          {
+            "stem": "vexat",
+            "severity": 0.47
+          },
+          {
+            "stem": "anxieti",
+            "severity": 0.47
+          },
+          {
+            "stem": "walk off",
+            "severity": 0.46
+          },
+          {
+            "stem": "rage",
+            "severity": 0.46
+          },
+          {
+            "stem": "tempera",
+            "severity": 0.46
+          },
+          {
+            "stem": "difficult",
+            "severity": 0.45
+          },
+          {
+            "stem": "displeas",
+            "severity": 0.45
+          },
+          {
+            "stem": "bother",
+            "severity": 0.44
+          },
+          {
+            "stem": "emot",
+            "severity": 0.44
+          },
+          {
+            "stem": "kibosh",
+            "severity": 0.43
+          },
+          {
+            "stem": "suffer",
+            "severity": 0.43
+          },
+          {
+            "stem": "bemoan",
+            "severity": 0.43
+          },
+          {
+            "stem": "distraught",
+            "severity": 0.43
+          },
+          {
+            "stem": "crisi",
+            "severity": 0.42
+          },
+          {
+            "stem": "disconcert",
+            "severity": 0.42
+          },
+          {
+            "stem": "negativ",
+            "severity": 0.42
+          },
+          {
+            "stem": "defeat",
+            "severity": 0.42
+          },
+          {
+            "stem": "grievanc",
+            "severity": 0.42
+          },
+          {
+            "stem": "infuri",
+            "severity": 0.41
+          },
+          {
+            "stem": "complain",
+            "severity": 0.41
+          },
+          {
+            "stem": "restless",
+            "severity": 0.41
+          },
+          {
+            "stem": "pain",
+            "severity": 0.41
+          },
+          {
+            "stem": "goddam",
+            "severity": 0.4
+          },
+          {
+            "stem": "nuisanc",
+            "severity": 0.39
+          },
+          {
+            "stem": "escal",
+            "severity": 0.39
+          },
+          {
+            "stem": "strain",
+            "severity": 0.39
+          },
+          {
+            "stem": "aggress",
+            "severity": 0.39
+          },
+          {
+            "stem": "goddamn",
+            "severity": 0.38
+          },
+          {
+            "stem": "mif",
+            "severity": 0.38
+          },
+          {
+            "stem": "hold back",
+            "severity": 0.37
+          },
+          {
+            "stem": "give up",
+            "severity": 0.36
+          },
+          {
+            "stem": "troubl",
+            "severity": 0.36
+          },
+          {
+            "stem": "unwilling",
+            "severity": 0.36
+          },
+          {
+            "stem": "end of tether",
+            "severity": 0.36
+          },
+          {
+            "stem": "bewilder",
+            "severity": 0.35
+          },
+          {
+            "stem": "disench",
+            "severity": 0.35
+          },
+          {
+            "stem": "gloomi",
+            "severity": 0.35
+          },
+          {
+            "stem": "mood",
+            "severity": 0.35
+          },
+          {
+            "stem": "violent",
+            "severity": 0.35
+          },
+          {
+            "stem": "furi",
+            "severity": 0.35
+          },
+          {
+            "stem": "discomfort",
+            "severity": 0.34
+          },
+          {
+            "stem": "embitt",
+            "severity": 0.34
+          },
+          {
+            "stem": "red-fac",
+            "severity": 0.34
+          },
+          {
+            "stem": "shock",
+            "severity": 0.34
+          },
+          {
+            "stem": "angst",
+            "severity": 0.34
+          },
+          {
+            "stem": "bottl up",
+            "severity": 0.33
+          },
+          {
+            "stem": "bankruptci",
+            "severity": 0.33
+          },
+          {
+            "stem": "regret",
+            "severity": 0.33
+          },
+          {
+            "stem": "shaki",
+            "severity": 0.33
+          },
+          {
+            "stem": "suppress",
+            "severity": 0.33
+          },
+          {
+            "stem": "anxious",
+            "severity": 0.32
+          },
+          {
+            "stem": "envious",
+            "severity": 0.32
+          },
+          {
+            "stem": "anguish",
+            "severity": 0.32
+          },
+          {
+            "stem": "build up",
+            "severity": 0.32
+          },
+          {
+            "stem": "helpless",
+            "severity": 0.31
+          }
+        ]
+      }
+    },
+    "desperation": {
+      "frictionLevel": 2,
+      "suggestedConstraints": [
+        "NO_UNASKED_ADVICE_EMOTIONAL",
+        "NO_HELPDESK"
+      ],
+      "primarySignature": "cliche_empathy",
+      "words": {
+        "nl": [
+          {
+            "stem": "laatst redmiddel",
+            "severity": 0.87
+          },
+          {
+            "stem": "smeekbed",
+            "severity": 0.81
+          },
+          {
+            "stem": "ten eind rad",
+            "severity": 0.81
+          },
+          {
+            "stem": "panisch",
+            "severity": 0.77
+          },
+          {
+            "stem": "uitschreeuw",
+            "severity": 0.76
+          },
+          {
+            "stem": "wanhop",
+            "severity": 0.76
+          },
+          {
+            "stem": "alles geprobeerd",
+            "severity": 0.76
+          },
+          {
+            "stem": "laatst hop",
+            "severity": 0.74
+          },
+          {
+            "stem": "nodig hebb",
+            "severity": 0.73
+          },
+          {
+            "stem": "smek",
+            "severity": 0.7
+          },
+          {
+            "stem": "smeekt",
+            "severity": 0.7
+          },
+          {
+            "stem": "verschrik",
+            "severity": 0.7
+          },
+          {
+            "stem": "gestrand",
+            "severity": 0.7
+          },
+          {
+            "stem": "worstel",
+            "severity": 0.7
+          },
+          {
+            "stem": "prober alles",
+            "severity": 0.7
+          },
+          {
+            "stem": "met spoed",
+            "severity": 0.7
+          },
+          {
+            "stem": "verontwaard",
+            "severity": 0.68
+          },
+          {
+            "stem": "bedel",
+            "severity": 0.68
+          },
+          {
+            "stem": "zich zorg mak",
+            "severity": 0.68
+          },
+          {
+            "stem": "nod",
+            "severity": 0.68
+          },
+          {
+            "stem": "schrijnend",
+            "severity": 0.68
+          },
+          {
+            "stem": "strijd",
+            "severity": 0.68
+          },
+          {
+            "stem": "de handdoek in de ring gooi",
+            "severity": 0.68
+          },
+          {
+            "stem": "bang",
+            "severity": 0.68
+          },
+          {
+            "stem": "woed",
+            "severity": 0.67
+          },
+          {
+            "stem": "berooid",
+            "severity": 0.67
+          },
+          {
+            "stem": "emotie",
+            "severity": 0.65
+          },
+          {
+            "stem": "huilend",
+            "severity": 0.65
+          },
+          {
+            "stem": "gen uitweg",
+            "severity": 0.64
+          },
+          {
+            "stem": "moeilijk",
+            "severity": 0.63
+          },
+          {
+            "stem": "help",
+            "severity": 0.63
+          },
+          {
+            "stem": "laatst keuz",
+            "severity": 0.63
+          },
+          {
+            "stem": "moeilijk tijd",
+            "severity": 0.63
+          },
+          {
+            "stem": "wens",
+            "severity": 0.63
+          },
+          {
+            "stem": "pleit",
+            "severity": 0.63
+          },
+          {
+            "stem": "hulpelos",
+            "severity": 0.62
+          },
+          {
+            "stem": "voel",
+            "severity": 0.61
+          },
+          {
+            "stem": "dringend",
+            "severity": 0.61
+          },
+          {
+            "stem": "opgev",
+            "severity": 0.6
+          },
+          {
+            "stem": "gewild",
+            "severity": 0.6
+          },
+          {
+            "stem": "laatst kan",
+            "severity": 0.59
+          },
+          {
+            "stem": "allen",
+            "severity": 0.59
+          },
+          {
+            "stem": "alsjeblieft",
+            "severity": 0.59
+          },
+          {
+            "stem": "verhonger",
+            "severity": 0.59
+          },
+          {
+            "stem": "nodig zijn",
+            "severity": 0.58
+          },
+          {
+            "stem": "led",
+            "severity": 0.58
+          },
+          {
+            "stem": "gefrustreerd",
+            "severity": 0.57
+          },
+          {
+            "stem": "frustratie",
+            "severity": 0.57
+          },
+          {
+            "stem": "dor elkar",
+            "severity": 0.57
+          },
+          {
+            "stem": "doodsbang",
+            "severity": 0.55
+          },
+          {
+            "stem": "eind",
+            "severity": 0.55
+          },
+          {
+            "stem": "angst",
+            "severity": 0.55
+          },
+          {
+            "stem": "huil",
+            "severity": 0.55
+          },
+          {
+            "stem": "gen ontsnapp",
+            "severity": 0.54
+          },
+          {
+            "stem": "gekweld",
+            "severity": 0.54
+          },
+          {
+            "stem": "problem",
+            "severity": 0.53
+          },
+          {
+            "stem": "lijd",
+            "severity": 0.53
+          },
+          {
+            "stem": "huild",
+            "severity": 0.53
+          },
+          {
+            "stem": "ongeduld",
+            "severity": 0.53
+          },
+          {
+            "stem": "spanning",
+            "severity": 0.53
+          },
+          {
+            "stem": "stres",
+            "severity": 0.53
+          },
+          {
+            "stem": "in paniek",
+            "severity": 0.52
+          },
+          {
+            "stem": "machtelos",
+            "severity": 0.52
+          },
+          {
+            "stem": "behoeft",
+            "severity": 0.51
+          },
+          {
+            "stem": "gevoelen",
+            "severity": 0.5
+          },
+          {
+            "stem": "daklos",
+            "severity": 0.5
+          },
+          {
+            "stem": "honger",
+            "severity": 0.5
+          },
+          {
+            "stem": "kwets",
+            "severity": 0.5
+          },
+          {
+            "stem": "paniek",
+            "severity": 0.5
+          },
+          {
+            "stem": "pauperism",
+            "severity": 0.5
+          },
+          {
+            "stem": "schreeuwend",
+            "severity": 0.5
+          },
+          {
+            "stem": "schreeuw het uit",
+            "severity": 0.5
+          },
+          {
+            "stem": "schreeuw",
+            "severity": 0.49
+          },
+          {
+            "stem": "laatst stadium",
+            "severity": 0.48
+          },
+          {
+            "stem": "tran",
+            "severity": 0.48
+          },
+          {
+            "stem": "nervositeit",
+            "severity": 0.48
+          },
+          {
+            "stem": "doodsangst",
+            "severity": 0.47
+          },
+          {
+            "stem": "huilt",
+            "severity": 0.47
+          },
+          {
+            "stem": "straatarm",
+            "severity": 0.47
+          },
+          {
+            "stem": "chaos",
+            "severity": 0.47
+          },
+          {
+            "stem": "ontber",
+            "severity": 0.46
+          },
+          {
+            "stem": "emotionel",
+            "severity": 0.46
+          },
+          {
+            "stem": "verlor",
+            "severity": 0.46
+          },
+          {
+            "stem": "hopelos",
+            "severity": 0.45
+          },
+          {
+            "stem": "emoties",
+            "severity": 0.45
+          },
+          {
+            "stem": "ongeluk",
+            "severity": 0.45
+          },
+          {
+            "stem": "overlev",
+            "severity": 0.45
+          },
+          {
+            "stem": "noodgeval",
+            "severity": 0.45
+          },
+          {
+            "stem": "roekelos",
+            "severity": 0.44
+          },
+          {
+            "stem": "kapot gegan",
+            "severity": 0.44
+          },
+          {
+            "stem": "blut",
+            "severity": 0.44
+          },
+          {
+            "stem": "platzak",
+            "severity": 0.44
+          },
+          {
+            "stem": "druk",
+            "severity": 0.43
+          },
+          {
+            "stem": "kwelling",
+            "severity": 0.43
+          },
+          {
+            "stem": "opgewond",
+            "severity": 0.43
+          },
+          {
+            "stem": "verslag",
+            "severity": 0.43
+          },
+          {
+            "stem": "will",
+            "severity": 0.43
+          },
+          {
+            "stem": "verdriet",
+            "severity": 0.42
+          },
+          {
+            "stem": "gespann",
+            "severity": 0.42
+          },
+          {
+            "stem": "leg",
+            "severity": 0.42
+          },
+          {
+            "stem": "haast",
+            "severity": 0.42
+          },
+          {
+            "stem": "gevar",
+            "severity": 0.42
+          },
+          {
+            "stem": "meest behoeft",
+            "severity": 0.41
+          },
+          {
+            "stem": "bedelar",
+            "severity": 0.4
+          },
+          {
+            "stem": "kan",
+            "severity": 0.4
+          },
+          {
+            "stem": "radelos",
+            "severity": 0.4
+          },
+          {
+            "stem": "misluk",
+            "severity": 0.4
+          },
+          {
+            "stem": "gef op",
+            "severity": 0.4
+          },
+          {
+            "stem": "vernederd",
+            "severity": 0.4
+          },
+          {
+            "stem": "wetsovertred",
+            "severity": 0.4
+          },
+          {
+            "stem": "wen",
+            "severity": 0.4
+          },
+          {
+            "stem": "alcoholism",
+            "severity": 0.39
+          },
+          {
+            "stem": "eng",
+            "severity": 0.39
+          },
+          {
+            "stem": "overgav",
+            "severity": 0.39
+          },
+          {
+            "stem": "pijn doen",
+            "severity": 0.39
+          },
+          {
+            "stem": "vreselijk",
+            "severity": 0.38
+          },
+          {
+            "stem": "gedoemd",
+            "severity": 0.38
+          },
+          {
+            "stem": "slecht",
+            "severity": 0.37
+          },
+          {
+            "stem": "verlang",
+            "severity": 0.37
+          },
+          {
+            "stem": "ongemak",
+            "severity": 0.37
+          },
+          {
+            "stem": "somber",
+            "severity": 0.37
+          },
+          {
+            "stem": "hartzer",
+            "severity": 0.36
+          },
+          {
+            "stem": "lag",
+            "severity": 0.36
+          },
+          {
+            "stem": "geisoleerd",
+            "severity": 0.35
+          },
+          {
+            "stem": "ellend",
+            "severity": 0.35
+          },
+          {
+            "stem": "uitgehongerd",
+            "severity": 0.35
+          },
+          {
+            "stem": "eenzam",
+            "severity": 0.35
+          },
+          {
+            "stem": "risico",
+            "severity": 0.35
+          },
+          {
+            "stem": "geergerd",
+            "severity": 0.34
+          },
+          {
+            "stem": "overhaast besliss",
+            "severity": 0.34
+          },
+          {
+            "stem": "kwetsbar",
+            "severity": 0.34
+          },
+          {
+            "stem": "bedreig",
+            "severity": 0.33
+          },
+          {
+            "stem": "tragisch",
+            "severity": 0.32
+          },
+          {
+            "stem": "beu",
+            "severity": 0.32
+          },
+          {
+            "stem": "psychiatrisch",
+            "severity": 0.32
+          },
+          {
+            "stem": "verstik",
+            "severity": 0.32
+          },
+          {
+            "stem": "alarm",
+            "severity": 0.3
+          },
+          {
+            "stem": "dorstig",
+            "severity": 0.3
+          },
+          {
+            "stem": "vloek",
+            "severity": 0.3
+          },
+          {
+            "stem": "uitput",
+            "severity": 0.3
+          },
+          {
+            "stem": "hongersnod",
+            "severity": 0.3
+          },
+          {
+            "stem": "eruit",
+            "severity": 0.3
+          },
+          {
+            "stem": "verlies",
+            "severity": 0.3
+          },
+          {
+            "stem": "geld",
+            "severity": 0.3
+          },
+          {
+            "stem": "beproev",
+            "severity": 0.3
+          },
+          {
+            "stem": "overreactie",
+            "severity": 0.3
+          },
+          {
+            "stem": "pijn",
+            "severity": 0.3
+          },
+          {
+            "stem": "droefheid",
+            "severity": 0.3
+          },
+          {
+            "stem": "moe van",
+            "severity": 0.3
+          },
+          {
+            "stem": "gescheurd",
+            "severity": 0.3
+          },
+          {
+            "stem": "poging",
+            "severity": 0.3
+          },
+          {
+            "stem": "uitgang",
+            "severity": 0.3
+          }
+        ],
+        "en": [
+          {
+            "stem": "last resort",
+            "severity": 0.87
+          },
+          {
+            "stem": "desper",
+            "severity": 0.8
+          },
+          {
+            "stem": "frantic",
+            "severity": 0.77
+          },
+          {
+            "stem": "hard time",
+            "severity": 0.77
+          },
+          {
+            "stem": "cri out",
+            "severity": 0.76
+          },
+          {
+            "stem": "tri everyth",
+            "severity": 0.76
+          },
+          {
+            "stem": "distress",
+            "severity": 0.75
+          },
+          {
+            "stem": "last hope",
+            "severity": 0.74
+          },
+          {
+            "stem": "despair",
+            "severity": 0.72
+          },
+          {
+            "stem": "dire",
+            "severity": 0.7
+          },
+          {
+            "stem": "strand",
+            "severity": 0.7
+          },
+          {
+            "stem": "tri anyth",
+            "severity": 0.7
+          },
+          {
+            "stem": "struggl",
+            "severity": 0.69
+          },
+          {
+            "stem": "beg",
+            "severity": 0.69
+          },
+          {
+            "stem": "outcri",
+            "severity": 0.68
+          },
+          {
+            "stem": "agoni",
+            "severity": 0.68
+          },
+          {
+            "stem": "throw in the towel",
+            "severity": 0.68
+          },
+          {
+            "stem": "anger",
+            "severity": 0.67
+          },
+          {
+            "stem": "destitut",
+            "severity": 0.67
+          },
+          {
+            "stem": "urgent",
+            "severity": 0.65
+          },
+          {
+            "stem": "no way out",
+            "severity": 0.64
+          },
+          {
+            "stem": "last choic",
+            "severity": 0.63
+          },
+          {
+            "stem": "helpless",
+            "severity": 0.62
+          },
+          {
+            "stem": "cri",
+            "severity": 0.59
+          },
+          {
+            "stem": "last chanc",
+            "severity": 0.59
+          },
+          {
+            "stem": "plead",
+            "severity": 0.59
+          },
+          {
+            "stem": "pleas",
+            "severity": 0.59
+          },
+          {
+            "stem": "problem",
+            "severity": 0.58
+          },
+          {
+            "stem": "needi",
+            "severity": 0.58
+          },
+          {
+            "stem": "plea",
+            "severity": 0.58
+          },
+          {
+            "stem": "frustrat",
+            "severity": 0.57
+          },
+          {
+            "stem": "mixed-up",
+            "severity": 0.57
+          },
+          {
+            "stem": "terrifi",
+            "severity": 0.55
+          },
+          {
+            "stem": "sorrow",
+            "severity": 0.55
+          },
+          {
+            "stem": "no escap",
+            "severity": 0.54
+          },
+          {
+            "stem": "suffer",
+            "severity": 0.54
+          },
+          {
+            "stem": "impati",
+            "severity": 0.53
+          },
+          {
+            "stem": "stress",
+            "severity": 0.53
+          },
+          {
+            "stem": "panick",
+            "severity": 0.52
+          },
+          {
+            "stem": "wish",
+            "severity": 0.52
+          },
+          {
+            "stem": "powerless",
+            "severity": 0.52
+          },
+          {
+            "stem": "emot",
+            "severity": 0.52
+          },
+          {
+            "stem": "homeless",
+            "severity": 0.5
+          },
+          {
+            "stem": "hunger",
+            "severity": 0.5
+          },
+          {
+            "stem": "panic",
+            "severity": 0.5
+          },
+          {
+            "stem": "pauper",
+            "severity": 0.5
+          },
+          {
+            "stem": "scream",
+            "severity": 0.5
+          },
+          {
+            "stem": "shout out",
+            "severity": 0.5
+          },
+          {
+            "stem": "tri time",
+            "severity": 0.5
+          },
+          {
+            "stem": "weep",
+            "severity": 0.5
+          },
+          {
+            "stem": "torment",
+            "severity": 0.49
+          },
+          {
+            "stem": "give up",
+            "severity": 0.49
+          },
+          {
+            "stem": "final stage",
+            "severity": 0.48
+          },
+          {
+            "stem": "tear",
+            "severity": 0.48
+          },
+          {
+            "stem": "nervous",
+            "severity": 0.48
+          },
+          {
+            "stem": "anguish",
+            "severity": 0.47
+          },
+          {
+            "stem": "poverty-stricken",
+            "severity": 0.47
+          },
+          {
+            "stem": "chao",
+            "severity": 0.47
+          },
+          {
+            "stem": "hopeless",
+            "severity": 0.46
+          },
+          {
+            "stem": "depriv",
+            "severity": 0.46
+          },
+          {
+            "stem": "lost",
+            "severity": 0.46
+          },
+          {
+            "stem": "need",
+            "severity": 0.45
+          },
+          {
+            "stem": "unhappi",
+            "severity": 0.45
+          },
+          {
+            "stem": "reckless",
+            "severity": 0.45
+          },
+          {
+            "stem": "emerg",
+            "severity": 0.45
+          },
+          {
+            "stem": "broke",
+            "severity": 0.44
+          },
+          {
+            "stem": "surviv",
+            "severity": 0.44
+          },
+          {
+            "stem": "anxious",
+            "severity": 0.44
+          },
+          {
+            "stem": "difficulti",
+            "severity": 0.44
+          },
+          {
+            "stem": "harm",
+            "severity": 0.43
+          },
+          {
+            "stem": "agit",
+            "severity": 0.43
+          },
+          {
+            "stem": "dismay",
+            "severity": 0.43
+          },
+          {
+            "stem": "feel",
+            "severity": 0.42
+          },
+          {
+            "stem": "empti",
+            "severity": 0.42
+          },
+          {
+            "stem": "hast",
+            "severity": 0.42
+          },
+          {
+            "stem": "do-or-di",
+            "severity": 0.41
+          },
+          {
+            "stem": "great depress",
+            "severity": 0.41
+          },
+          {
+            "stem": "yell",
+            "severity": 0.41
+          },
+          {
+            "stem": "neediest",
+            "severity": 0.41
+          },
+          {
+            "stem": "worri",
+            "severity": 0.41
+          },
+          {
+            "stem": "beggar",
+            "severity": 0.4
+          },
+          {
+            "stem": "chanc",
+            "severity": 0.4
+          },
+          {
+            "stem": "distraught",
+            "severity": 0.4
+          },
+          {
+            "stem": "failur",
+            "severity": 0.4
+          },
+          {
+            "stem": "law-break",
+            "severity": 0.4
+          },
+          {
+            "stem": "scrambl",
+            "severity": 0.4
+          },
+          {
+            "stem": "alcohol",
+            "severity": 0.39
+          },
+          {
+            "stem": "scari",
+            "severity": 0.39
+          },
+          {
+            "stem": "loneli",
+            "severity": 0.39
+          },
+          {
+            "stem": "surrend",
+            "severity": 0.39
+          },
+          {
+            "stem": "threat",
+            "severity": 0.38
+          },
+          {
+            "stem": "sad",
+            "severity": 0.38
+          },
+          {
+            "stem": "hurt",
+            "severity": 0.38
+          },
+          {
+            "stem": "aw",
+            "severity": 0.38
+          },
+          {
+            "stem": "doom",
+            "severity": 0.38
+          },
+          {
+            "stem": "desir",
+            "severity": 0.37
+          },
+          {
+            "stem": "discomfort",
+            "severity": 0.37
+          },
+          {
+            "stem": "gloomi",
+            "severity": 0.37
+          },
+          {
+            "stem": "heartach",
+            "severity": 0.36
+          },
+          {
+            "stem": "low",
+            "severity": 0.36
+          },
+          {
+            "stem": "isol",
+            "severity": 0.35
+          },
+          {
+            "stem": "miseri",
+            "severity": 0.35
+          },
+          {
+            "stem": "natur depress",
+            "severity": 0.35
+          },
+          {
+            "stem": "risk",
+            "severity": 0.35
+          },
+          {
+            "stem": "exasper",
+            "severity": 0.34
+          },
+          {
+            "stem": "rash decis",
+            "severity": 0.34
+          },
+          {
+            "stem": "starv",
+            "severity": 0.34
+          },
+          {
+            "stem": "vulner",
+            "severity": 0.34
+          },
+          {
+            "stem": "troubl",
+            "severity": 0.34
+          },
+          {
+            "stem": "want",
+            "severity": 0.33
+          },
+          {
+            "stem": "pressur",
+            "severity": 0.33
+          },
+          {
+            "stem": "tragic",
+            "severity": 0.32
+          },
+          {
+            "stem": "fed up",
+            "severity": 0.32
+          },
+          {
+            "stem": "psychiatr",
+            "severity": 0.32
+          },
+          {
+            "stem": "suffoc",
+            "severity": 0.32
+          }
+        ]
+      }
+    },
+    "grievance": {
+      "frictionLevel": 2,
+      "suggestedConstraints": [
+        "NO_HELPDESK",
+        "BAN_CLICHE_PHRASES"
+      ],
+      "primarySignature": "helpdesk_tone",
+      "words": {
+        "nl": [
+          {
+            "stem": "geklaagd",
+            "severity": 0.78
+          },
+          {
+            "stem": "kwets",
+            "severity": 0.74
+          },
+          {
+            "stem": "lijd",
+            "severity": 0.73
+          },
+          {
+            "stem": "geled",
+            "severity": 0.73
+          },
+          {
+            "stem": "van strek",
+            "severity": 0.72
+          },
+          {
+            "stem": "lucht",
+            "severity": 0.7
+          },
+          {
+            "stem": "luguber",
+            "severity": 0.7
+          },
+          {
+            "stem": "ongeluk",
+            "severity": 0.7
+          },
+          {
+            "stem": "rouw",
+            "severity": 0.69
+          },
+          {
+            "stem": "problem",
+            "severity": 0.68
+          },
+          {
+            "stem": "moeilijk",
+            "severity": 0.68
+          },
+          {
+            "stem": "niet tevred",
+            "severity": 0.68
+          },
+          {
+            "stem": "onrecht aangedan",
+            "severity": 0.68
+          },
+          {
+            "stem": "klacht",
+            "severity": 0.66
+          },
+          {
+            "stem": "doet zer",
+            "severity": 0.66
+          },
+          {
+            "stem": "rechtszak",
+            "severity": 0.66
+          },
+          {
+            "stem": "pijn",
+            "severity": 0.65
+          },
+          {
+            "stem": "lijdt",
+            "severity": 0.65
+          },
+          {
+            "stem": "onrechtvaard",
+            "severity": 0.63
+          },
+          {
+            "stem": "serieus",
+            "severity": 0.6
+          },
+          {
+            "stem": "schend",
+            "severity": 0.6
+          },
+          {
+            "stem": "eenzam",
+            "severity": 0.57
+          },
+          {
+            "stem": "kwad",
+            "severity": 0.57
+          },
+          {
+            "stem": "negatief",
+            "severity": 0.57
+          },
+          {
+            "stem": "ontevred",
+            "severity": 0.57
+          },
+          {
+            "stem": "pijn doen",
+            "severity": 0.57
+          },
+          {
+            "stem": "discriminatie",
+            "severity": 0.56
+          },
+          {
+            "stem": "teleurgesteld",
+            "severity": 0.55
+          },
+          {
+            "stem": "angst",
+            "severity": 0.54
+          },
+          {
+            "stem": "verstor",
+            "severity": 0.53
+          },
+          {
+            "stem": "gefrustreerd",
+            "severity": 0.53
+          },
+          {
+            "stem": "onrecht",
+            "severity": 0.52
+          },
+          {
+            "stem": "frustraties",
+            "severity": 0.52
+          },
+          {
+            "stem": "verdriet",
+            "severity": 0.52
+          },
+          {
+            "stem": "gepijnigd",
+            "severity": 0.52
+          },
+          {
+            "stem": "droefheid",
+            "severity": 0.52
+          },
+          {
+            "stem": "geergerd",
+            "severity": 0.52
+          },
+          {
+            "stem": "verbitterd",
+            "severity": 0.52
+          },
+          {
+            "stem": "erger",
+            "severity": 0.5
+          },
+          {
+            "stem": "dod",
+            "severity": 0.5
+          },
+          {
+            "stem": "woed",
+            "severity": 0.49
+          },
+          {
+            "stem": "vreselijk",
+            "severity": 0.48
+          },
+          {
+            "stem": "verontrust",
+            "severity": 0.46
+          },
+          {
+            "stem": "bedroefd",
+            "severity": 0.46
+          },
+          {
+            "stem": "gekrenkt",
+            "severity": 0.46
+          },
+          {
+            "stem": "benadeeld",
+            "severity": 0.46
+          },
+          {
+            "stem": "schrijnend",
+            "severity": 0.45
+          },
+          {
+            "stem": "mishandel",
+            "severity": 0.42
+          },
+          {
+            "stem": "beledigd",
+            "severity": 0.42
+          },
+          {
+            "stem": "verontwaardigd",
+            "severity": 0.42
+          },
+          {
+            "stem": "zich zorg mak",
+            "severity": 0.42
+          },
+          {
+            "stem": "fout",
+            "severity": 0.42
+          },
+          {
+            "stem": "beschuld",
+            "severity": 0.42
+          },
+          {
+            "stem": "wee",
+            "severity": 0.42
+          },
+          {
+            "stem": "wanhop",
+            "severity": 0.41
+          },
+          {
+            "stem": "verliez",
+            "severity": 0.41
+          },
+          {
+            "stem": "rancun",
+            "severity": 0.41
+          },
+          {
+            "stem": "overtred",
+            "severity": 0.41
+          },
+          {
+            "stem": "somber",
+            "severity": 0.4
+          },
+          {
+            "stem": "verschill",
+            "severity": 0.39
+          },
+          {
+            "stem": "gevoelen",
+            "severity": 0.39
+          },
+          {
+            "stem": "wrak",
+            "severity": 0.39
+          },
+          {
+            "stem": "tragisch",
+            "severity": 0.38
+          },
+          {
+            "stem": "overval",
+            "severity": 0.38
+          },
+          {
+            "stem": "moord",
+            "severity": 0.38
+          },
+          {
+            "stem": "gewond",
+            "severity": 0.38
+          },
+          {
+            "stem": "gestok",
+            "severity": 0.37
+          },
+          {
+            "stem": "slachtoffer",
+            "severity": 0.37
+          },
+          {
+            "stem": "aangevall",
+            "severity": 0.37
+          },
+          {
+            "stem": "nod",
+            "severity": 0.36
+          },
+          {
+            "stem": "oner",
+            "severity": 0.36
+          },
+          {
+            "stem": "bos",
+            "severity": 0.35
+          },
+          {
+            "stem": "worstel",
+            "severity": 0.35
+          },
+          {
+            "stem": "ontlucht",
+            "severity": 0.34
+          },
+          {
+            "stem": "geirriteerd",
+            "severity": 0.34
+          },
+          {
+            "stem": "betreurenswaard",
+            "severity": 0.34
+          },
+          {
+            "stem": "verontschuld",
+            "severity": 0.33
+          },
+          {
+            "stem": "nabestaand",
+            "severity": 0.33
+          },
+          {
+            "stem": "nijdig",
+            "severity": 0.33
+          },
+          {
+            "stem": "breekbar",
+            "severity": 0.32
+          },
+          {
+            "stem": "discriminer",
+            "severity": 0.32
+          },
+          {
+            "stem": "doodsangst",
+            "severity": 0.3
+          },
+          {
+            "stem": "schad",
+            "severity": 0.3
+          },
+          {
+            "stem": "ontzet",
+            "severity": 0.3
+          },
+          {
+            "stem": "hartverscheur",
+            "severity": 0.3
+          },
+          {
+            "stem": "toebreng",
+            "severity": 0.3
+          },
+          {
+            "stem": "verkeerd begrep",
+            "severity": 0.3
+          },
+          {
+            "stem": "rouwend",
+            "severity": 0.3
+          },
+          {
+            "stem": "onderdruk",
+            "severity": 0.3
+          },
+          {
+            "stem": "spijtig",
+            "severity": 0.3
+          },
+          {
+            "stem": "zelfmoord",
+            "severity": 0.3
+          },
+          {
+            "stem": "onaanvaard",
+            "severity": 0.3
+          }
+        ],
+        "en": [
+          {
+            "stem": "grief",
+            "severity": 0.85
+          },
+          {
+            "stem": "complain",
+            "severity": 0.78
+          },
+          {
+            "stem": "problem",
+            "severity": 0.76
+          },
+          {
+            "stem": "suffer",
+            "severity": 0.71
+          },
+          {
+            "stem": "air out",
+            "severity": 0.7
+          },
+          {
+            "stem": "disgruntl",
+            "severity": 0.7
+          },
+          {
+            "stem": "lugubri",
+            "severity": 0.7
+          },
+          {
+            "stem": "unhappi",
+            "severity": 0.7
+          },
+          {
+            "stem": "difficult",
+            "severity": 0.68
+          },
+          {
+            "stem": "displeas",
+            "severity": 0.68
+          },
+          {
+            "stem": "complaint",
+            "severity": 0.66
+          },
+          {
+            "stem": "hurt",
+            "severity": 0.66
+          },
+          {
+            "stem": "unjust",
+            "severity": 0.66
+          },
+          {
+            "stem": "upset",
+            "severity": 0.64
+          },
+          {
+            "stem": "peev",
+            "severity": 0.62
+          },
+          {
+            "stem": "anger",
+            "severity": 0.61
+          },
+          {
+            "stem": "dissatisfact",
+            "severity": 0.59
+          },
+          {
+            "stem": "unsatisfi",
+            "severity": 0.59
+          },
+          {
+            "stem": "loneli",
+            "severity": 0.57
+          },
+          {
+            "stem": "piss off",
+            "severity": 0.57
+          },
+          {
+            "stem": "negat",
+            "severity": 0.57
+          },
+          {
+            "stem": "distress",
+            "severity": 0.57
+          },
+          {
+            "stem": "injustic",
+            "severity": 0.56
+          },
+          {
+            "stem": "discrimin",
+            "severity": 0.56
+          },
+          {
+            "stem": "sad",
+            "severity": 0.53
+          },
+          {
+            "stem": "embitt",
+            "severity": 0.52
+          },
+          {
+            "stem": "somber",
+            "severity": 0.5
+          },
+          {
+            "stem": "horribl",
+            "severity": 0.48
+          },
+          {
+            "stem": "troubl",
+            "severity": 0.47
+          },
+          {
+            "stem": "aggriev",
+            "severity": 0.46
+          },
+          {
+            "stem": "perturb",
+            "severity": 0.46
+          },
+          {
+            "stem": "transgress",
+            "severity": 0.45
+          },
+          {
+            "stem": "angst",
+            "severity": 0.43
+          },
+          {
+            "stem": "mishandl",
+            "severity": 0.42
+          },
+          {
+            "stem": "frustrat",
+            "severity": 0.42
+          },
+          {
+            "stem": "woe",
+            "severity": 0.42
+          },
+          {
+            "stem": "despair",
+            "severity": 0.41
+          },
+          {
+            "stem": "irk",
+            "severity": 0.41
+          },
+          {
+            "stem": "lose",
+            "severity": 0.41
+          },
+          {
+            "stem": "resent",
+            "severity": 0.41
+          },
+          {
+            "stem": "differ",
+            "severity": 0.39
+          },
+          {
+            "stem": "feel",
+            "severity": 0.39
+          },
+          {
+            "stem": "vengeanc",
+            "severity": 0.39
+          },
+          {
+            "stem": "wrong",
+            "severity": 0.39
+          },
+          {
+            "stem": "disappoint",
+            "severity": 0.38
+          },
+          {
+            "stem": "tragic",
+            "severity": 0.38
+          },
+          {
+            "stem": "assault",
+            "severity": 0.38
+          },
+          {
+            "stem": "ire",
+            "severity": 0.38
+          },
+          {
+            "stem": "murder",
+            "severity": 0.38
+          },
+          {
+            "stem": "stung",
+            "severity": 0.37
+          },
+          {
+            "stem": "victim",
+            "severity": 0.37
+          },
+          {
+            "stem": "infract",
+            "severity": 0.37
+          },
+          {
+            "stem": "agoni",
+            "severity": 0.36
+          },
+          {
+            "stem": "lawsuit",
+            "severity": 0.36
+          },
+          {
+            "stem": "piss",
+            "severity": 0.35
+          },
+          {
+            "stem": "struggl",
+            "severity": 0.35
+          },
+          {
+            "stem": "vent",
+            "severity": 0.34
+          },
+          {
+            "stem": "worri",
+            "severity": 0.34
+          },
+          {
+            "stem": "apologis",
+            "severity": 0.33
+          },
+          {
+            "stem": "unfair",
+            "severity": 0.33
+          },
+          {
+            "stem": "mif",
+            "severity": 0.33
+          },
+          {
+            "stem": "fragil",
+            "severity": 0.32
+          },
+          {
+            "stem": "pain",
+            "severity": 0.32
+          },
+          {
+            "stem": "discriminatori",
+            "severity": 0.32
+          }
+        ]
+      }
+    },
+    "hate": {
+      "frictionLevel": 3,
+      "suggestedConstraints": [
+        "BAN_CLICHE_PHRASES",
+        "NO_HELPDESK",
+        "NO_UNASKED_ADVICE_EMOTIONAL",
+        "DEFAULT_PROSE",
+        "MAX_LEN_600"
+      ],
+      "primarySignature": "helpdesk_tone",
+      "words": {
+        "nl": [
+          {
+            "stem": "een hekel hebb aan",
+            "severity": 0.9
+          },
+          {
+            "stem": "hat crim",
+            "severity": 0.9
+          },
+          {
+            "stem": "rassendiscriminatie",
+            "severity": 0.9
+          },
+          {
+            "stem": "geweld",
+            "severity": 0.9
+          },
+          {
+            "stem": "verafschuw",
+            "severity": 0.86
+          },
+          {
+            "stem": "negatief",
+            "severity": 0.86
+          },
+          {
+            "stem": "negatiev emotie",
+            "severity": 0.85
+          },
+          {
+            "stem": "hat",
+            "severity": 0.85
+          },
+          {
+            "stem": "vreemdelingenhat",
+            "severity": 0.83
+          },
+          {
+            "stem": "afker",
+            "severity": 0.79
+          },
+          {
+            "stem": "kwets",
+            "severity": 0.79
+          },
+          {
+            "stem": "gevoelen",
+            "severity": 0.78
+          },
+          {
+            "stem": "terroristisch dad",
+            "severity": 0.74
+          },
+          {
+            "stem": "heftig",
+            "severity": 0.73
+          },
+          {
+            "stem": "woedend",
+            "severity": 0.73
+          },
+          {
+            "stem": "agressies",
+            "severity": 0.72
+          },
+          {
+            "stem": "aanstot nem",
+            "severity": 0.72
+          },
+          {
+            "stem": "agressiviteit",
+            "severity": 0.72
+          },
+          {
+            "stem": "woed",
+            "severity": 0.72
+          },
+          {
+            "stem": "houdt niet van",
+            "severity": 0.72
+          },
+          {
+            "stem": "aanvall",
+            "severity": 0.71
+          },
+          {
+            "stem": "racism",
+            "severity": 0.7
+          },
+          {
+            "stem": "beschimp",
+            "severity": 0.7
+          },
+          {
+            "stem": "boosaard",
+            "severity": 0.7
+          },
+          {
+            "stem": "nemesis",
+            "severity": 0.7
+          },
+          {
+            "stem": "terrorism",
+            "severity": 0.7
+          },
+          {
+            "stem": "toorn",
+            "severity": 0.7
+          },
+          {
+            "stem": "rancun",
+            "severity": 0.69
+          },
+          {
+            "stem": "onverdraagzam",
+            "severity": 0.69
+          },
+          {
+            "stem": "bos",
+            "severity": 0.69
+          },
+          {
+            "stem": "gemen",
+            "severity": 0.69
+          },
+          {
+            "stem": "pestkopp",
+            "severity": 0.68
+          },
+          {
+            "stem": "vooroordel",
+            "severity": 0.68
+          },
+          {
+            "stem": "homofobie",
+            "severity": 0.68
+          },
+          {
+            "stem": "betreur",
+            "severity": 0.68
+          },
+          {
+            "stem": "vijand",
+            "severity": 0.66
+          },
+          {
+            "stem": "extremism",
+            "severity": 0.66
+          },
+          {
+            "stem": "intimidatie",
+            "severity": 0.66
+          },
+          {
+            "stem": "bombardement",
+            "severity": 0.66
+          },
+          {
+            "stem": "walging",
+            "severity": 0.66
+          },
+          {
+            "stem": "hevig",
+            "severity": 0.66
+          },
+          {
+            "stem": "conflict",
+            "severity": 0.65
+          },
+          {
+            "stem": "extremist",
+            "severity": 0.65
+          },
+          {
+            "stem": "antisemitism",
+            "severity": 0.65
+          },
+          {
+            "stem": "schadelijk",
+            "severity": 0.64
+          },
+          {
+            "stem": "segregatie",
+            "severity": 0.64
+          },
+          {
+            "stem": "nar",
+            "severity": 0.63
+          },
+          {
+            "stem": "zelfdestructief",
+            "severity": 0.63
+          },
+          {
+            "stem": "ongeluk",
+            "severity": 0.63
+          },
+          {
+            "stem": "verniet",
+            "severity": 0.62
+          },
+          {
+            "stem": "bang mak",
+            "severity": 0.62
+          },
+          {
+            "stem": "ongenoeg",
+            "severity": 0.62
+          },
+          {
+            "stem": "slecht",
+            "severity": 0.62
+          },
+          {
+            "stem": "woest",
+            "severity": 0.61
+          },
+          {
+            "stem": "roodzien",
+            "severity": 0.6
+          },
+          {
+            "stem": "tirannie",
+            "severity": 0.6
+          },
+          {
+            "stem": "misdad",
+            "severity": 0.59
+          },
+          {
+            "stem": "mishandel",
+            "severity": 0.59
+          },
+          {
+            "stem": "misdrijf",
+            "severity": 0.59
+          },
+          {
+            "stem": "vrouwenhat",
+            "severity": 0.59
+          },
+          {
+            "stem": "oorlogvoer",
+            "severity": 0.59
+          },
+          {
+            "stem": "politiek sympathieen",
+            "severity": 0.59
+          },
+          {
+            "stem": "brutaliteit",
+            "severity": 0.58
+          },
+          {
+            "stem": "frustratie",
+            "severity": 0.58
+          },
+          {
+            "stem": "gevar",
+            "severity": 0.58
+          },
+          {
+            "stem": "ontevred",
+            "severity": 0.57
+          },
+          {
+            "stem": "onwet",
+            "severity": 0.57
+          },
+          {
+            "stem": "agressie",
+            "severity": 0.57
+          },
+          {
+            "stem": "tegenstander",
+            "severity": 0.57
+          },
+          {
+            "stem": "aanval",
+            "severity": 0.57
+          },
+          {
+            "stem": "passie",
+            "severity": 0.57
+          },
+          {
+            "stem": "agitatie",
+            "severity": 0.56
+          },
+          {
+            "stem": "veracht",
+            "severity": 0.56
+          },
+          {
+            "stem": "gediscrimineerd",
+            "severity": 0.56
+          },
+          {
+            "stem": "slechtheid",
+            "severity": 0.55
+          },
+          {
+            "stem": "afschuw",
+            "severity": 0.55
+          },
+          {
+            "stem": "protest",
+            "severity": 0.55
+          },
+          {
+            "stem": "terreur",
+            "severity": 0.55
+          },
+          {
+            "stem": "kwaadaard",
+            "severity": 0.54
+          },
+          {
+            "stem": "moorddad",
+            "severity": 0.54
+          },
+          {
+            "stem": "onderdruk",
+            "severity": 0.54
+          },
+          {
+            "stem": "pijn",
+            "severity": 0.54
+          },
+          {
+            "stem": "uithal",
+            "severity": 0.54
+          },
+          {
+            "stem": "zur",
+            "severity": 0.53
+          },
+          {
+            "stem": "verwoest",
+            "severity": 0.53
+          },
+          {
+            "stem": "wred",
+            "severity": 0.53
+          },
+          {
+            "stem": "verontwaard",
+            "severity": 0.53
+          },
+          {
+            "stem": "lijd",
+            "severity": 0.53
+          },
+          {
+            "stem": "terrorist",
+            "severity": 0.53
+          },
+          {
+            "stem": "gepest",
+            "severity": 0.52
+          },
+          {
+            "stem": "afstot",
+            "severity": 0.52
+          },
+          {
+            "stem": "onrust",
+            "severity": 0.52
+          },
+          {
+            "stem": "wreedheid",
+            "severity": 0.52
+          },
+          {
+            "stem": "jaloezie",
+            "severity": 0.51
+          },
+          {
+            "stem": "moord",
+            "severity": 0.51
+          },
+          {
+            "stem": "teg",
+            "severity": 0.5
+          },
+          {
+            "stem": "kapot mak",
+            "severity": 0.5
+          },
+          {
+            "stem": "kwad",
+            "severity": 0.5
+          },
+          {
+            "stem": "doodt",
+            "severity": 0.5
+          },
+          {
+            "stem": "ras-",
+            "severity": 0.5
+          },
+          {
+            "stem": "sociopathisch",
+            "severity": 0.5
+          },
+          {
+            "stem": "hatelijk",
+            "severity": 0.5
+          },
+          {
+            "stem": "gevecht",
+            "severity": 0.49
+          },
+          {
+            "stem": "led",
+            "severity": 0.48
+          },
+          {
+            "stem": "oordel",
+            "severity": 0.48
+          },
+          {
+            "stem": "arrogant",
+            "severity": 0.48
+          },
+          {
+            "stem": "gevoel",
+            "severity": 0.48
+          },
+          {
+            "stem": "ter dod breng",
+            "severity": 0.48
+          },
+          {
+            "stem": "intimider",
+            "severity": 0.47
+          },
+          {
+            "stem": "bitter",
+            "severity": 0.47
+          },
+          {
+            "stem": "meedogenlos",
+            "severity": 0.47
+          },
+          {
+            "stem": "gesel",
+            "severity": 0.47
+          },
+          {
+            "stem": "wapen",
+            "severity": 0.47
+          },
+          {
+            "stem": "discriminatie",
+            "severity": 0.47
+          },
+          {
+            "stem": "aangevall",
+            "severity": 0.46
+          },
+          {
+            "stem": "twijfel",
+            "severity": 0.46
+          },
+          {
+            "stem": "venijn",
+            "severity": 0.45
+          },
+          {
+            "stem": "onmens behandel",
+            "severity": 0.45
+          },
+          {
+            "stem": "bedreig",
+            "severity": 0.45
+          },
+          {
+            "stem": "lelijk",
+            "severity": 0.45
+          },
+          {
+            "stem": "ellend",
+            "severity": 0.45
+          },
+          {
+            "stem": "waardelos",
+            "severity": 0.44
+          },
+          {
+            "stem": "doet zer",
+            "severity": 0.44
+          },
+          {
+            "stem": "vreselijk",
+            "severity": 0.44
+          },
+          {
+            "stem": "krachtig",
+            "severity": 0.43
+          },
+          {
+            "stem": "oorlog",
+            "severity": 0.43
+          },
+          {
+            "stem": "hardheid",
+            "severity": 0.43
+          },
+          {
+            "stem": "onrecht",
+            "severity": 0.43
+          },
+          {
+            "stem": "onrechtvaard",
+            "severity": 0.42
+          },
+          {
+            "stem": "sekt",
+            "severity": 0.42
+          },
+          {
+            "stem": "dissonantie",
+            "severity": 0.42
+          },
+          {
+            "stem": "narcistisch",
+            "severity": 0.42
+          },
+          {
+            "stem": "ruzie mak",
+            "severity": 0.42
+          },
+          {
+            "stem": "wantrouw",
+            "severity": 0.42
+          },
+          {
+            "stem": "dod",
+            "severity": 0.42
+          },
+          {
+            "stem": "corruptie",
+            "severity": 0.41
+          },
+          {
+            "stem": "ergernis",
+            "severity": 0.41
+          },
+          {
+            "stem": "bijtend",
+            "severity": 0.41
+          },
+          {
+            "stem": "misgunn",
+            "severity": 0.4
+          },
+          {
+            "stem": "verstoord",
+            "severity": 0.4
+          },
+          {
+            "stem": "verderf",
+            "severity": 0.4
+          },
+          {
+            "stem": "dreiging",
+            "severity": 0.4
+          },
+          {
+            "stem": "beled",
+            "severity": 0.4
+          },
+          {
+            "stem": "gedacht",
+            "severity": 0.4
+          },
+          {
+            "stem": "in tegenstell tot",
+            "severity": 0.4
+          },
+          {
+            "stem": "schurk",
+            "severity": 0.39
+          },
+          {
+            "stem": "slechterik",
+            "severity": 0.39
+          },
+          {
+            "stem": "verwens",
+            "severity": 0.39
+          },
+          {
+            "stem": "bloedvergiet",
+            "severity": 0.39
+          },
+          {
+            "stem": "schiet",
+            "severity": 0.39
+          },
+          {
+            "stem": "controver",
+            "severity": 0.38
+          },
+          {
+            "stem": "overtred",
+            "severity": 0.38
+          },
+          {
+            "stem": "losgeslag",
+            "severity": 0.38
+          },
+          {
+            "stem": "vecht",
+            "severity": 0.38
+          },
+          {
+            "stem": "qaeda",
+            "severity": 0.37
+          },
+          {
+            "stem": "scheldend",
+            "severity": 0.37
+          },
+          {
+            "stem": "antisociaal",
+            "severity": 0.36
+          },
+          {
+            "stem": "verrot",
+            "severity": 0.36
+          },
+          {
+            "stem": "ongecontroleerd",
+            "severity": 0.36
+          },
+          {
+            "stem": "angst",
+            "severity": 0.36
+          },
+          {
+            "stem": "furor",
+            "severity": 0.36
+          },
+          {
+            "stem": "pest",
+            "severity": 0.35
+          },
+          {
+            "stem": "verontwaardigd",
+            "severity": 0.35
+          },
+          {
+            "stem": "nadel",
+            "severity": 0.35
+          },
+          {
+            "stem": "brutal",
+            "severity": 0.35
+          },
+          {
+            "stem": "angstaanjag",
+            "severity": 0.35
+          },
+          {
+            "stem": "kracht",
+            "severity": 0.34
+          },
+          {
+            "stem": "heilig terreur",
+            "severity": 0.34
+          },
+          {
+            "stem": "uitwiss",
+            "severity": 0.34
+          },
+          {
+            "stem": "minacht",
+            "severity": 0.34
+          },
+          {
+            "stem": "felheid",
+            "severity": 0.34
+          },
+          {
+            "stem": "genadelos",
+            "severity": 0.34
+          },
+          {
+            "stem": "nor",
+            "severity": 0.34
+          },
+          {
+            "stem": "ongevoel",
+            "severity": 0.33
+          },
+          {
+            "stem": "zich verzet teg",
+            "severity": 0.33
+          },
+          {
+            "stem": "pestkop",
+            "severity": 0.33
+          },
+          {
+            "stem": "onlogisch",
+            "severity": 0.33
+          },
+          {
+            "stem": "worstel",
+            "severity": 0.33
+          },
+          {
+            "stem": "negatief gelad",
+            "severity": 0.32
+          },
+          {
+            "stem": "schandal",
+            "severity": 0.32
+          },
+          {
+            "stem": "uitdag",
+            "severity": 0.32
+          },
+          {
+            "stem": "ziek mak",
+            "severity": 0.32
+          },
+          {
+            "stem": "bang",
+            "severity": 0.3
+          },
+          {
+            "stem": "incident",
+            "severity": 0.3
+          },
+          {
+            "stem": "gedod",
+            "severity": 0.3
+          },
+          {
+            "stem": "rotting",
+            "severity": 0.3
+          }
+        ],
+        "en": [
+          {
+            "stem": "despis",
+            "severity": 0.9
+          },
+          {
+            "stem": "detest",
+            "severity": 0.9
+          },
+          {
+            "stem": "hate crime",
+            "severity": 0.9
+          },
+          {
+            "stem": "hoi polloi",
+            "severity": 0.9
+          },
+          {
+            "stem": "racial discrimin",
+            "severity": 0.9
+          },
+          {
+            "stem": "violenc",
+            "severity": 0.9
+          },
+          {
+            "stem": "hatr",
+            "severity": 0.88
+          },
+          {
+            "stem": "loath",
+            "severity": 0.88
+          },
+          {
+            "stem": "racism",
+            "severity": 0.87
+          },
+          {
+            "stem": "negat",
+            "severity": 0.86
+          },
+          {
+            "stem": "hate",
+            "severity": 0.85
+          },
+          {
+            "stem": "negat emot",
+            "severity": 0.85
+          },
+          {
+            "stem": "enemi",
+            "severity": 0.84
+          },
+          {
+            "stem": "xenophobia",
+            "severity": 0.83
+          },
+          {
+            "stem": "revuls",
+            "severity": 0.82
+          },
+          {
+            "stem": "abhor",
+            "severity": 0.81
+          },
+          {
+            "stem": "angri",
+            "severity": 0.81
+          },
+          {
+            "stem": "distast",
+            "severity": 0.81
+          },
+          {
+            "stem": "cruelti",
+            "severity": 0.79
+          },
+          {
+            "stem": "malic",
+            "severity": 0.78
+          },
+          {
+            "stem": "act of terror",
+            "severity": 0.78
+          },
+          {
+            "stem": "bigotri",
+            "severity": 0.77
+          },
+          {
+            "stem": "ire",
+            "severity": 0.77
+          },
+          {
+            "stem": "rage",
+            "severity": 0.76
+          },
+          {
+            "stem": "vicious",
+            "severity": 0.75
+          },
+          {
+            "stem": "vehement",
+            "severity": 0.73
+          },
+          {
+            "stem": "dislik",
+            "severity": 0.73
+          },
+          {
+            "stem": "enrag",
+            "severity": 0.7
+          },
+          {
+            "stem": "furi",
+            "severity": 0.7
+          },
+          {
+            "stem": "invect",
+            "severity": 0.7
+          },
+          {
+            "stem": "malici",
+            "severity": 0.7
+          },
+          {
+            "stem": "nemesi",
+            "severity": 0.7
+          },
+          {
+            "stem": "terrorist act",
+            "severity": 0.7
+          },
+          {
+            "stem": "wrath",
+            "severity": 0.7
+          },
+          {
+            "stem": "prejudic",
+            "severity": 0.69
+          },
+          {
+            "stem": "homophobia",
+            "severity": 0.68
+          },
+          {
+            "stem": "resent",
+            "severity": 0.68
+          },
+          {
+            "stem": "deplor",
+            "severity": 0.68
+          },
+          {
+            "stem": "anger",
+            "severity": 0.67
+          },
+          {
+            "stem": "aggress",
+            "severity": 0.67
+          },
+          {
+            "stem": "extrem",
+            "severity": 0.66
+          },
+          {
+            "stem": "harass",
+            "severity": 0.66
+          },
+          {
+            "stem": "violent",
+            "severity": 0.66
+          },
+          {
+            "stem": "conflict",
+            "severity": 0.65
+          },
+          {
+            "stem": "extremist",
+            "severity": 0.65
+          },
+          {
+            "stem": "hostil",
+            "severity": 0.65
+          },
+          {
+            "stem": "jealousi",
+            "severity": 0.65
+          },
+          {
+            "stem": "anti-semit",
+            "severity": 0.65
+          },
+          {
+            "stem": "wick",
+            "severity": 0.65
+          },
+          {
+            "stem": "yob",
+            "severity": 0.64
+          },
+          {
+            "stem": "segreg",
+            "severity": 0.64
+          },
+          {
+            "stem": "furious",
+            "severity": 0.64
+          },
+          {
+            "stem": "self-destruct",
+            "severity": 0.63
+          },
+          {
+            "stem": "unhappi",
+            "severity": 0.63
+          },
+          {
+            "stem": "spite",
+            "severity": 0.63
+          },
+          {
+            "stem": "nasti",
+            "severity": 0.62
+          },
+          {
+            "stem": "terror",
+            "severity": 0.62
+          },
+          {
+            "stem": "bullyrag",
+            "severity": 0.62
+          },
+          {
+            "stem": "disfavour",
+            "severity": 0.62
+          },
+          {
+            "stem": "judgement",
+            "severity": 0.62
+          },
+          {
+            "stem": "intoler",
+            "severity": 0.61
+          },
+          {
+            "stem": "state of war",
+            "severity": 0.61
+          },
+          {
+            "stem": "threat",
+            "severity": 0.61
+          },
+          {
+            "stem": "attack",
+            "severity": 0.61
+          },
+          {
+            "stem": "disgust",
+            "severity": 0.61
+          },
+          {
+            "stem": "feel",
+            "severity": 0.61
+          },
+          {
+            "stem": "brutal",
+            "severity": 0.6
+          },
+          {
+            "stem": "see red",
+            "severity": 0.6
+          },
+          {
+            "stem": "tyranni",
+            "severity": 0.6
+          },
+          {
+            "stem": "evil",
+            "severity": 0.59
+          },
+          {
+            "stem": "crime",
+            "severity": 0.59
+          },
+          {
+            "stem": "assault",
+            "severity": 0.59
+          },
+          {
+            "stem": "misogyni",
+            "severity": 0.59
+          },
+          {
+            "stem": "warfar",
+            "severity": 0.59
+          },
+          {
+            "stem": "polit sympathi",
+            "severity": 0.59
+          },
+          {
+            "stem": "discont",
+            "severity": 0.57
+          },
+          {
+            "stem": "ignor",
+            "severity": 0.57
+          },
+          {
+            "stem": "passion",
+            "severity": 0.57
+          },
+          {
+            "stem": "destruct",
+            "severity": 0.56
+          },
+          {
+            "stem": "horribl",
+            "severity": 0.56
+          },
+          {
+            "stem": "vile",
+            "severity": 0.55
+          },
+          {
+            "stem": "foe",
+            "severity": 0.55
+          },
+          {
+            "stem": "protest",
+            "severity": 0.55
+          },
+          {
+            "stem": "terrorist",
+            "severity": 0.54
+          },
+          {
+            "stem": "murder",
+            "severity": 0.54
+          },
+          {
+            "stem": "oppress",
+            "severity": 0.54
+          },
+          {
+            "stem": "lash out",
+            "severity": 0.54
+          },
+          {
+            "stem": "acrid",
+            "severity": 0.53
+          },
+          {
+            "stem": "bitchi",
+            "severity": 0.53
+          },
+          {
+            "stem": "wicked",
+            "severity": 0.52
+          },
+          {
+            "stem": "repel",
+            "severity": 0.52
+          },
+          {
+            "stem": "unrest",
+            "severity": 0.52
+          },
+          {
+            "stem": "racial",
+            "severity": 0.52
+          },
+          {
+            "stem": "discrimin",
+            "severity": 0.5
+          },
+          {
+            "stem": "fight down",
+            "severity": 0.5
+          },
+          {
+            "stem": "foeman",
+            "severity": 0.5
+          },
+          {
+            "stem": "savageri",
+            "severity": 0.5
+          },
+          {
+            "stem": "sociopath",
+            "severity": 0.5
+          },
+          {
+            "stem": "bulli",
+            "severity": 0.49
+          },
+          {
+            "stem": "cruel",
+            "severity": 0.49
+          },
+          {
+            "stem": "harm",
+            "severity": 0.48
+          },
+          {
+            "stem": "arrog",
+            "severity": 0.48
+          },
+          {
+            "stem": "put to death",
+            "severity": 0.48
+          },
+          {
+            "stem": "intimid",
+            "severity": 0.47
+          },
+          {
+            "stem": "bitter",
+            "severity": 0.47
+          },
+          {
+            "stem": "fight",
+            "severity": 0.47
+          },
+          {
+            "stem": "merciless",
+            "severity": 0.47
+          },
+          {
+            "stem": "scourg",
+            "severity": 0.47
+          },
+          {
+            "stem": "weapon",
+            "severity": 0.47
+          },
+          {
+            "stem": "vitriol",
+            "severity": 0.47
+          },
+          {
+            "stem": "misgiv",
+            "severity": 0.46
+          },
+          {
+            "stem": "bomb",
+            "severity": 0.45
+          },
+          {
+            "stem": "hurt",
+            "severity": 0.45
+          },
+          {
+            "stem": "contemn",
+            "severity": 0.45
+          },
+          {
+            "stem": "inhuman treatment",
+            "severity": 0.45
+          },
+          {
+            "stem": "ugli",
+            "severity": 0.45
+          },
+          {
+            "stem": "wretch",
+            "severity": 0.45
+          },
+          {
+            "stem": "venom",
+            "severity": 0.44
+          },
+          {
+            "stem": "worthless",
+            "severity": 0.44
+          },
+          {
+            "stem": "war",
+            "severity": 0.44
+          },
+          {
+            "stem": "kill",
+            "severity": 0.43
+          },
+          {
+            "stem": "injustic",
+            "severity": 0.43
+          },
+          {
+            "stem": "outrag",
+            "severity": 0.42
+          },
+          {
+            "stem": "cult",
+            "severity": 0.42
+          },
+          {
+            "stem": "disson",
+            "severity": 0.42
+          },
+          {
+            "stem": "narcissist",
+            "severity": 0.42
+          },
+          {
+            "stem": "distrust",
+            "severity": 0.42
+          },
+          {
+            "stem": "danger",
+            "severity": 0.41
+          },
+          {
+            "stem": "annoy",
+            "severity": 0.41
+          },
+          {
+            "stem": "corros",
+            "severity": 0.41
+          },
+          {
+            "stem": "agit",
+            "severity": 0.41
+          },
+          {
+            "stem": "begrudg",
+            "severity": 0.4
+          },
+          {
+            "stem": "disturb",
+            "severity": 0.4
+          },
+          {
+            "stem": "malef",
+            "severity": 0.4
+          },
+          {
+            "stem": "menac",
+            "severity": 0.4
+          },
+          {
+            "stem": "offend",
+            "severity": 0.4
+          },
+          {
+            "stem": "thought",
+            "severity": 0.4
+          },
+          {
+            "stem": "unlik",
+            "severity": 0.4
+          },
+          {
+            "stem": "distress",
+            "severity": 0.39
+          },
+          {
+            "stem": "villain",
+            "severity": 0.39
+          },
+          {
+            "stem": "execr",
+            "severity": 0.39
+          },
+          {
+            "stem": "bloodsh",
+            "severity": 0.39
+          },
+          {
+            "stem": "shoot",
+            "severity": 0.39
+          },
+          {
+            "stem": "fierc",
+            "severity": 0.38
+          },
+          {
+            "stem": "controversi",
+            "severity": 0.38
+          },
+          {
+            "stem": "frustrat",
+            "severity": 0.38
+          },
+          {
+            "stem": "offenc",
+            "severity": 0.38
+          },
+          {
+            "stem": "unhing",
+            "severity": 0.38
+          },
+          {
+            "stem": "envi",
+            "severity": 0.38
+          },
+          {
+            "stem": "feroc",
+            "severity": 0.38
+          },
+          {
+            "stem": "harsh",
+            "severity": 0.37
+          },
+          {
+            "stem": "qaeda",
+            "severity": 0.37
+          },
+          {
+            "stem": "vitup",
+            "severity": 0.37
+          },
+          {
+            "stem": "anti-soci",
+            "severity": 0.36
+          },
+          {
+            "stem": "rotten",
+            "severity": 0.36
+          },
+          {
+            "stem": "argu",
+            "severity": 0.36
+          },
+          {
+            "stem": "advers",
+            "severity": 0.35
+          },
+          {
+            "stem": "brutish",
+            "severity": 0.35
+          },
+          {
+            "stem": "holi terror",
+            "severity": 0.34
+          },
+          {
+            "stem": "judgment",
+            "severity": 0.34
+          },
+          {
+            "stem": "obliter",
+            "severity": 0.34
+          },
+          {
+            "stem": "scorn",
+            "severity": 0.34
+          },
+          {
+            "stem": "mad",
+            "severity": 0.34
+          },
+          {
+            "stem": "sur",
+            "severity": 0.34
+          },
+          {
+            "stem": "insensit",
+            "severity": 0.33
+          },
+          {
+            "stem": "oppos",
+            "severity": 0.33
+          },
+          {
+            "stem": "corrupt",
+            "severity": 0.33
+          },
+          {
+            "stem": "despic",
+            "severity": 0.33
+          },
+          {
+            "stem": "illog",
+            "severity": 0.33
+          },
+          {
+            "stem": "struggl",
+            "severity": 0.33
+          },
+          {
+            "stem": "suffer",
+            "severity": 0.32
+          },
+          {
+            "stem": "damag",
+            "severity": 0.32
+          },
+          {
+            "stem": "negat charg",
+            "severity": 0.32
+          },
+          {
+            "stem": "aw",
+            "severity": 0.32
+          },
+          {
+            "stem": "taunt",
+            "severity": 0.32
+          },
+          {
+            "stem": "sicken",
+            "severity": 0.32
+          },
+          {
+            "stem": "scath",
+            "severity": 0.31
+          }
+        ]
+      }
+    }
+  }
+}

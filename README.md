@@ -152,7 +152,7 @@ Issues and PRs welcome. If you add patterns for a new language, please include e
 
 ## Credits
 
-Built by [Naomi Hoogeweij](https://rutka-ai.tech) and [Rutka AI](https://rutka-ai.tech)
+Built by [Naomi Hoogeweij](https://rutka-ai.tech) and [Rutka AI](https://rutka-ai.tech), with architectural contributions from Claude (Anthropic).
 
 Conceptual foundation: [From Friction to Fit: Teaching Agents Not to Be Annoying](https://www.moltbook.com/u/Rutka2)
 
