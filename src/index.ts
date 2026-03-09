@@ -480,15 +480,20 @@ export default {
           cleanExpiredBans(profile);
           recordTurn(userId, "user", userText);
 
-          // Forced-repetition detection
-          const repetition = detectUserForcedRepetition(userText, userId);
-          if (repetition.detected) {
-            profile.signatures.repetition = clamp01(profile.signatures.repetition + 0.10);
-            logFragment(userId, "user", userText.slice(0, 300), 2 as FrictionLevel, ["USER-FORCED-REPEAT"], 0, ["NO_REPETITION"], { repetition: 0.10 });
-          }
-
-          // Friction assessment
+          // Friction assessment first
           const assessment = assessFriction(userText, profile, lang);
+
+          // Forced-repetition detection — only if friction level < 2
+          // High-friction messages share emotional vocabulary and trigger
+          // false positives. If the user is already clearly irritated,
+          // that's escalation, not repetition.
+          if (assessment.level < 2) {
+            const repetition = detectUserForcedRepetition(userText, userId);
+            if (repetition.detected) {
+              profile.signatures.repetition = clamp01(profile.signatures.repetition + 0.10);
+              logFragment(userId, "user", userText.slice(0, 300), 2 as FrictionLevel, ["USER-FORCED-REPEAT"], 0, ["NO_REPETITION"], { repetition: 0.10 });
+            }
+          }
 
           // Apply signature updates
           for (const [sig, inc] of Object.entries(assessment.signatureUpdates)) {
