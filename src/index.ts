@@ -330,15 +330,40 @@ function buildFrictionNote(level: FrictionLevel): string {
 // Helpers
 // ──────────────────────────────────────────────
 
+/**
+ * Strip WhatsApp/channel metadata headers from user messages.
+ * OpenClaw channels prepend envelope data like:
+ *   Conversation info (untrusted metadata): {...}
+ *   Sender (untrusted metadata): {...}
+ * before the actual user text.
+ */
+function stripChannelMetadata(text: string): string {
+  // Remove lines starting with known metadata prefixes + their JSON blocks
+  let cleaned = text
+    .replace(/^Conversation info \(untrusted metadata\):.*$/gm, "")
+    .replace(/^Sender \(untrusted metadata\):.*$/gm, "")
+    .replace(/^\{[\s\S]*?\}$/gm, "") // remove standalone JSON blocks
+    .replace(/^message_id:.*$/gm, "")
+    .replace(/^timestamp:.*$/gm, "")
+    .replace(/^\s*\n/gm, ""); // collapse empty lines
+
+  return cleaned.trim();
+}
+
 function extractLastUserMessage(messages: any[]): string | null {
   if (!messages || !Array.isArray(messages)) return null;
   for (let i = messages.length - 1; i >= 0; i--) {
     const msg = messages[i];
     if (msg.role === "user") {
-      if (typeof msg.content === "string") return msg.content;
+      let text: string | null = null;
+      if (typeof msg.content === "string") text = msg.content;
       if (Array.isArray(msg.content)) {
-        const text = msg.content.find((p: any) => p.type === "text" && typeof p.text === "string");
-        if (text) return text.text;
+        const part = msg.content.find((p: any) => p.type === "text" && typeof p.text === "string");
+        if (part) text = part.text;
+      }
+      if (text) {
+        const cleaned = stripChannelMetadata(text);
+        if (cleaned.length > 0) return cleaned;
       }
     }
   }
