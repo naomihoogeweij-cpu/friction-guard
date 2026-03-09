@@ -57,8 +57,9 @@ export interface RepetitionResult {
 const HISTORY_DIR = join(__dirname, "..", "memory", "turn-history");
 const MAX_TURNS = 30; // sliding window
 const AGENT_REPETITION_THRESHOLD = 0.55; // Jaccard on trigrams
-const USER_REPETITION_THRESHOLD = 0.50;
+const USER_REPETITION_THRESHOLD = 0.65; // raised from 0.50 — conversational follow-ups share vocabulary
 const MIN_TEXT_LENGTH = 15; // ignore very short messages
+const MIN_SHARED_TRIGRAMS = 3; // need at least 3 matching trigrams, not just high ratio
 
 // ──────────────────────────────────────────────
 // Storage
@@ -163,6 +164,14 @@ function jaccard(a: Set<string>, b: Set<string>): number {
   return union === 0 ? 0 : intersection / union;
 }
 
+function sharedCount(a: Set<string>, b: Set<string>): number {
+  let count = 0;
+  for (const item of a) {
+    if (b.has(item)) count++;
+  }
+  return count;
+}
+
 /**
  * Combined similarity score using weighted Jaccard across
  * trigrams (most weight), bigrams, and word overlap.
@@ -264,6 +273,7 @@ export function detectUserForcedRepetition(
   const current = makeTurnRecord("user", userText);
   let highest = 0;
   let repeatedWith: number | undefined;
+  let bestSharedTrigrams = 0;
 
   for (let i = 0; i < userTurns.length; i++) {
     const past = makeTurnRecord("user", userTurns[i].text);
@@ -271,13 +281,19 @@ export function detectUserForcedRepetition(
     if (sim > highest) {
       highest = sim;
       repeatedWith = i;
+      bestSharedTrigrams = sharedCount(current.ngrams3, past.ngrams3);
     }
   }
 
+  // Both conditions must hold: high similarity AND enough shared trigrams.
+  // This prevents false positives on short follow-up questions that share
+  // a few common words but aren't actual repetitions.
+  const detected = highest >= USER_REPETITION_THRESHOLD && bestSharedTrigrams >= MIN_SHARED_TRIGRAMS;
+
   return {
-    detected: highest >= USER_REPETITION_THRESHOLD,
+    detected,
     highestSimilarity: highest,
-    repeatedWith: highest >= USER_REPETITION_THRESHOLD ? repeatedWith : undefined,
+    repeatedWith: detected ? repeatedWith : undefined,
   };
 }
 
