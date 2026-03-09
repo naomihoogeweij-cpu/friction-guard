@@ -368,6 +368,16 @@ function stripChannelMetadata(text: string): string {
   // Remove cron/heartbeat wrapper lines
   cleaned = cleaned.replace(/^(?:queued|cron|heartbeat|system):.*$/gm, "");
 
+  // Remove media attachment markers: [media attached: image.jpg], [audio message], etc.
+  cleaned = cleaned.replace(/\[(?:media attached|audio message|video message|image|sticker|document|voice note|gif)[^\]]*\]/gi, "");
+
+  // Remove tool/system instruction blocks (OpenClaw injects these for media handling etc.)
+  cleaned = cleaned.replace(/^(?:To (?:send|reply|respond|return|attach|include|upload)[\s\S]*?)(?=\n\n|\n[A-Z]|$)/gim, "");
+  cleaned = cleaned.replace(/^(?:Note:|Instructions?:|System:|Context:).*$/gm, "");
+
+  // Remove image/file return instructions
+  cleaned = cleaned.replace(/^.*(?:send (?:the |an? )?image|return (?:the |an? )?(?:image|file|media)|attach (?:the |an? )?(?:image|file)).*$/gim, "");
+
   // Collapse whitespace
   cleaned = cleaned.replace(/\n{3,}/g, "\n\n").trim();
 
