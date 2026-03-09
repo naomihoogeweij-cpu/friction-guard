@@ -332,22 +332,46 @@ function buildFrictionNote(level: FrictionLevel): string {
 
 /**
  * Strip WhatsApp/channel metadata headers from user messages.
- * OpenClaw channels prepend envelope data like:
- *   Conversation info (untrusted metadata): {...}
- *   Sender (untrusted metadata): {...}
- * before the actual user text.
+ * OpenClaw channels prepend envelope data in this format:
+ *
+ *   Conversation info (untrusted metadata):
+ *   ```json
+ *   { "message_id": "...", "sender_id": "...", ... }
+ *   ```
+ *
+ *   Sender (untrusted metadata):
+ *   ```json
+ *   { "label": "...", "id": "...", ... }
+ *   ```
+ *
+ *   [actual user message here]
  */
 function stripChannelMetadata(text: string): string {
-  // Remove lines starting with known metadata prefixes + their JSON blocks
-  let cleaned = text
-    .replace(/^Conversation info \(untrusted metadata\):.*$/gm, "")
-    .replace(/^Sender \(untrusted metadata\):.*$/gm, "")
-    .replace(/^\{[\s\S]*?\}$/gm, "") // remove standalone JSON blocks
-    .replace(/^message_id:.*$/gm, "")
-    .replace(/^timestamp:.*$/gm, "")
-    .replace(/^\s*\n/gm, ""); // collapse empty lines
+  // Remove metadata sections: header line + fenced JSON block
+  let cleaned = text.replace(
+    /(?:Conversation info|Sender|Message context|Channel metadata)\s*\(untrusted metadata\)\s*:\s*```json?\s*\{[\s\S]*?\}\s*```/gi,
+    ""
+  );
 
-  return cleaned.trim();
+  // Also handle unfenced JSON blocks after metadata headers
+  cleaned = cleaned.replace(
+    /(?:Conversation info|Sender|Message context|Channel metadata)\s*\(untrusted metadata\)\s*:\s*\{[\s\S]*?\}/gi,
+    ""
+  );
+
+  // Remove any remaining standalone fenced code blocks that look like metadata
+  cleaned = cleaned.replace(
+    /```json?\s*\{\s*"(?:message_id|sender_id|sender|label|id|name|e164)[\s\S]*?\}\s*```/gi,
+    ""
+  );
+
+  // Remove cron/heartbeat wrapper lines
+  cleaned = cleaned.replace(/^(?:queued|cron|heartbeat|system):.*$/gm, "");
+
+  // Collapse whitespace
+  cleaned = cleaned.replace(/\n{3,}/g, "\n\n").trim();
+
+  return cleaned;
 }
 
 function extractLastUserMessage(messages: any[]): string | null {
