@@ -1,5 +1,17 @@
 # Changelog
 
+## 3.2.0 (2026-03-10)
+
+### Reduced forced-repeat false positives
+- Raised user repetition threshold from 0.50 to 0.65
+- Added minimum shared trigram requirement (≥3) — high Jaccard ratio alone is no longer sufficient
+- Moved forced-repeat detection after friction assessment; skipped when friction level ≥ 2 (escalation, not repetition)
+
+### Input sanitizing
+- Strip WhatsApp/channel metadata envelopes (Conversation info, Sender blocks with fenced JSON)
+- Strip media attachment markers (`[media attached: ...]`)
+- Strip tool/system instruction blocks injected by OpenClaw for media handling
+
 ## 3.1.0 (2026-03-09)
 
 ### Grievance Dictionary integration
