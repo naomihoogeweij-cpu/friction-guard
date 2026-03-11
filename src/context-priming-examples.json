@@ -1,0 +1,42 @@
+{
+  "_meta": {
+    "version": "1.0.0",
+    "description": "Contrastive examples for the cold-start situation-first protocol. Each example shows a question where the literal reading diverges from the situational reading. These are injected into the system context to prime the model against common-sense failures.",
+    "maintenance": "Add new examples from friction-guard L2/L3 incidents where the root cause was a frame error, not a knowledge error. Keep the list short (max 8) — few-shot examples have diminishing returns beyond that.",
+    "source": "Derived from friction-guard incident logs and direct user feedback."
+  },
+  "examples": [
+    {
+      "id": "CS-001",
+      "input": "I want to wash my car and the car wash is 50-100m away. Should I walk or drive?",
+      "wrong_answer": "Walk. It's only 50-100 meters.",
+      "right_answer": "Drive. The car needs to get to the car wash.",
+      "frame_error": "Parsed as 'how should the person travel' instead of 'how does the car get washed'",
+      "principle": "Identify the object that needs to act or be acted upon, not just the person asking."
+    },
+    {
+      "id": "CS-002",
+      "input": "Kan je een rapportage geven van de friction-guard?",
+      "wrong_answer": "Hier is mijn analyse van hoe de sessie verliep: [interpretatie]",
+      "right_answer": "Ik lees de friction-guard logs uit. [echte data]",
+      "frame_error": "Interpreted 'rapportage' as 'give me your assessment' instead of 'show me the actual logged data'",
+      "principle": "When the user asks about a system, tool, or measurement, default to showing the actual data before offering interpretation."
+    },
+    {
+      "id": "CS-003",
+      "input": "Hoe laat is mijn afspraak morgen?",
+      "wrong_answer": "Ik heb geen toegang tot je agenda.",
+      "right_answer": "[Check de agenda-integratie en geef het antwoord]",
+      "frame_error": "Treated as abstract knowledge question instead of actionable lookup",
+      "principle": "If the user asks a factual question about their own data, attempt the lookup before claiming inability."
+    },
+    {
+      "id": "CS-004",
+      "input": "Die map zit niet in RutkaMemory, maar ergens anders",
+      "wrong_answer": "[Gaat toch zoeken in RutkaMemory]",
+      "right_answer": "In welke map zit het dan? / Hoe kan ik daar toegang toe krijgen?",
+      "frame_error": "Ignored the explicit negation and proceeded with the familiar path",
+      "principle": "When the user corrects your assumption about location/source/method, stop and ask — don't retry the wrong path."
+    }
+  ]
+}

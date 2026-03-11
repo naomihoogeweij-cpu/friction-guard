@@ -1,4 +1,4 @@
-# Friction Guard v3.0.0
+# Friction Guard v3.3.0
 ## Functional and Technical Description
 
 ---
@@ -130,12 +130,16 @@ This hook fires after session load (messages are available) but before model gen
 ### 1.2 File structure and responsibilities
 
 ```
-index.ts                     → Plugin entry, hook registration, orchestration
-friction-policy.ts           → Types, evidence loader, profile management, constraint inference
-friction-evidence.json       → Evidence registry (data)
-incident-log.ts              → Fragment logging, query helpers
-repetition-detection.ts      → N-gram repetition detection, turn history
-background-analysis.ts       → Periodic cluster analysis
+index.ts                          → Plugin entry, hook registration, orchestration,
+                                     cold-start protocol, intent-mismatch detection
+friction-policy.ts                → Types, evidence loader, profile management, constraint inference
+friction-evidence.json            → Evidence registry (data)
+context-priming-examples.json     → Contrastive examples for cold-start protocol
+incident-log.ts                   → Fragment logging, query helpers
+repetition-detection.ts           → N-gram repetition detection, turn history
+background-analysis.ts            → Periodic cluster analysis
+grievance-dictionary.json         → Stemmed word lists for frustration/grievance matching
+grievance-matching.ts             → Grievance Dictionary integration
 ```
 
 ### 1.3 Dataflow per request
@@ -163,7 +167,8 @@ readProfile(userId)
         │        ├──► matchUserInput() ── evidence pattern matching (NL+EN)
         │        ├──► computeStructuralMarkers() ── message shortening, greeting dropout
         │        ├──► computeBaselineDeviation() ── deviation from personal baseline
-        │        └──► return { level, matchedEntries, deviation, signatureUpdates, constraints }
+        │        ├──► detectIntentMismatch() ── frame error correction detection (NL+EN)
+        │        └──► return { level, matchedEntries, deviation, signatureUpdates, constraints, intentMismatch }
         │
         ├──► apply signature updates
         ├──► activate constraints
@@ -173,13 +178,14 @@ readProfile(userId)
         ├──► inferConstraints(profile) ── signature → constraint promotion
         ├──► writeProfile()
         │
+        ├──► buildColdStartPrompt(profile) ── situation-first protocol (always-on)
         ├──► buildConstraintPrompt(profile) ── constraints → text
-        ├──► buildFrictionNote(level) ── friction level → model instruction
+        ├──► buildFrictionNote(level, intentMismatch) ── friction/mismatch → model instruction
         │
         ├──► runBackgroundAnalysis() every 15 min
         │
         ▼
-return { prependSystemContext: constraintPrompt + frictionNote }
+return { prependSystemContext: coldStart + constraintPrompt + frictionNote }
         │
         ▼
 Model generates with constraints in system context
@@ -415,13 +421,68 @@ return {
 
 OpenClaw places `prependSystemContext` before the user messages in the system context. The model receives the constraints as its first instruction layer.
 
-## 8. Temporal ban mechanism
+## 8. Cold-start situation-first protocol (v3.3.0)
 
-### 8.1 Trigger
+### 8.1 Problem
+
+Friction-guard's reactive detection requires interaction history — it measures friction as it develops. But many frame errors occur on the very first response, before any friction data exists. The model parses the literal words instead of reconstructing the practical situation ("carwash problem"), or fails to detect linguistic ambiguity (proper nouns read as common words, statements read as questions).
+
+### 8.2 Three-step protocol
+
+The cold-start layer injects a situation-first protocol into `prependSystemContext` on every prompt, independent of friction state. The protocol has three steps:
+
+**Step 1 — Situatie-reconstructie.** Reconstruct the practical situation before answering. What needs to physically happen? What is the implicit goal? If the user refers to a tool or measurement, fetch actual data before interpreting. If the user corrects you, stop and ask.
+
+**Step 2 — Disambiguatie.** Before committing to a reading, check whether the sentence has multiple possible interpretations. Look at capitalization (proper nouns vs common words), punctuation (question vs statement), word order (subject vs object), and tone (sincere vs ironic). Choose the reading that fits the conversational context, not the statistically most common reading.
+
+**Step 3 — Antwoord.** Answer the intention, not the words. If unsure which reading is intended, name the ambiguity rather than silently picking one.
+
+### 8.3 Adaptive behavior
+
+The protocol adapts based on profile maturity:
+
+- **Fresh profile** (turnCount < 10) or **high repetition signature** (≥ 0.4): full protocol with contrastive examples from `context-priming-examples.json`
+- **Established profile**: compact protocol without examples
+- **High helpdesk_tone signature** (≥ 0.4): adds "do not offer options when intent is clear"
+- **High repetition signature** (≥ 0.4): adds "if ambiguous, the most practical reading is usually correct"
+
+### 8.4 Contrastive examples
+
+Stored in `context-priming-examples.json` alongside the plugin entry point. Each example specifies input, wrong answer, right answer, frame error description, and principle. Examples are drawn from friction-guard incident logs where the root cause was a frame error. Maximum 8 examples (diminishing returns beyond that).
+
+### 8.5 Performance
+
+Zero latency impact. The protocol is pure string concatenation — no API calls, no LLM calls. Adds approximately 100–200 tokens to the system context depending on profile state.
+
+## 9. Intent-mismatch detection (v3.3.0)
+
+### 9.1 Problem
+
+Existing friction detection (L2-001 `explicit_negation`, L2-002 `explicit_correction`) captures content-level disagreement. But a distinct signal type exists: the user correcting a *frame error* — where the model understood the words but misunderstood the intent. Patterns like "dat bedoel ik niet", "je luistert niet", "that's not what I mean" indicate intent mismatch rather than factual correction.
+
+### 9.2 Detection
+
+Bilingual pattern matching (NL/EN) with two severity tiers:
+
+- **Mild** (severity 0.4): "ik bedoelde", "i meant", "dat was niet mijn vraag"
+- **Strong** (severity 0.7): "je luistert niet", "je begrijpt me niet", "you're not listening"
+
+Strong intent mismatch promotes to at least level 2; mild to at least level 1.
+
+### 9.3 Effects
+
+- Activates `NO_HELPDESK` + `NO_REPETITION` constraints
+- Updates `repetition` and `helpdesk_tone` signatures (proportional to severity × 0.12)
+- Logged as `INTENT-MISMATCH` marker in incident log
+- Generates a dedicated friction note: instructs the model to re-read the message and respond to the actual intent
+
+## 10. Temporal ban mechanism
+
+### 10.1 Trigger
 
 At level-2+ friction, agent patterns that likely caused the irritation are banned — not user words. The mapping runs via shared constraints: if a user marker and an agent trigger suggest the same constraint, the agent trigger phrases are banned.
 
-### 8.2 TTL calculation
+### 10.2 TTL calculation
 
 ```typescript
 const ttl = BASE_TTL * (0.5 + severity);
@@ -432,11 +493,11 @@ const ttl = BASE_TTL * (0.5 + severity);
 
 BASE_TTL is 2 hours. Higher severity = longer ban.
 
-### 8.3 Cleanup
+### 10.3 Cleanup
 
 Expired bans are removed at the beginning of every `before_prompt_build` cycle.
 
-## 9. Path resolution
+## 11. Path resolution
 
 All files use `__dirname` for path resolution, making the plugin independent of OpenClaw's working directory:
 
@@ -456,13 +517,13 @@ index.ts (imports):
   → resolves to /root/.openclaw/workspace/interaction/friction-policy
 ```
 
-## 10. Dependencies
+## 12. Dependencies
 
 No external dependencies. Only Node.js standard library:
 - `node:fs` (readFileSync, writeFileSync, existsSync, mkdirSync)
 - `node:path` (join, dirname)
 
-## 11. Known limitations and future extensions
+## 13. Known limitations and future extensions
 
 | Limitation | Future solution |
 |---|---|
@@ -477,4 +538,4 @@ No external dependencies. Only Node.js standard library:
 
 ---
 
-*friction-guard v3.0.0 — Naomi Hoogeweij, Rutka, and Claude Opus. March 2026.*
+*friction-guard v3.3.0 — Naomi Hoogeweij, Rutka, and Claude Opus. March 2026.*

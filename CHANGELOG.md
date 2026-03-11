@@ -1,5 +1,31 @@
 # Changelog
 
+## 3.3.0 (2026-03-11)
+
+### Cold-start situation-first protocol
+- New always-on context priming layer injected via `prependSystemContext` on every prompt
+- Three-step protocol: (1) situatie-reconstructie — reconstruct the practical situation and implicit goal, (2) disambiguatie — check for multiple readings based on capitalization, punctuation, word order, and tone, (3) antwoord — answer the intention, name ambiguity when unsure
+- Adapts to profile maturity: full protocol with contrastive examples for new users (turnCount < 10) or users with high repetition signature; compact protocol for established profiles
+- Contrastive examples stored in `context-priming-examples.json` — maintainable from incident logs without code changes
+- Profile-aware adaptive priors: adds user-specific instructions when signatures indicate recurring patterns (e.g., high helpdesk_tone → "do not offer options when intent is clear")
+- Zero latency impact: pure string concatenation, no API calls, no LLM calls
+
+### Intent-mismatch detection
+- New detection layer for frame errors: when the user corrects a misunderstanding of their intent (not a factual error or repetition)
+- Bilingual pattern matching (NL/EN) for phrases like "dat bedoel ik niet", "je luistert niet", "that's not what I mean", "you're not listening"
+- Two severity tiers: mild (0.4, e.g., "ik bedoelde...") and strong (0.7, e.g., "je luistert niet")
+- Strong intent mismatch promotes to level 2; mild to level 1
+- Activates NO_HELPDESK + NO_REPETITION constraints
+- Updates repetition and helpdesk_tone signatures proportionally
+- Logged as INTENT-MISMATCH marker in incident log for background analysis
+- Dedicated friction note for intent mismatch: instructs model to re-read and respond to actual intent
+
+### Architecture
+- `buildFrictionNote()` now accepts intent-mismatch result and generates mismatch-specific model instructions
+- `assessFriction()` return type extended with `intentMismatch` field
+- Injection order: cold-start protocol → constraint block → friction note
+- Version bump to 3.3.0
+
 ## 3.2.0 (2026-03-10)
 
 ### Reduced forced-repeat false positives
@@ -39,5 +65,3 @@ Initial public release.
 - Bilingual pattern matching (English + Dutch)
 - Agent-trigger detection (cliché empathy, helpdesk filler, premature structure)
 - Grounded in CMAI, LIWC-22, Grievance Dictionary, and COLING-2025 frustration detection research
-
-
