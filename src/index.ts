@@ -56,6 +56,11 @@ import {
   runPatternMining,
   getMinedPatterns,
 } from "./agent-pattern-miner";
+import {
+  loadPrimingExamples,
+  buildColdStartPrompt,
+  isColdStart,
+} from "./cold-start-priming";
 
 // ──────────────────────────────────────────────
 // Constants (overridable via config)
@@ -489,13 +494,14 @@ export default {
 
     const defaultLang = config.defaultLanguage || "en";
 
-    logger.info("[friction-guard] v3.0.0 — pre-generation constraint injection");
+    logger.info("[friction-guard] v3.4.0 — pre-generation constraint injection");
 
     try {
       const entries = loadEvidence();
       logger.info(`[friction-guard] Evidence registry: ${entries.length} entries loaded`);
       loadGrievanceDictionary(); // preload + log count
       loadAgentIrritationRegistry(); // preload agent-side patterns
+      loadPrimingExamples(); // preload cold-start contrastive examples
     } catch (e) {
       logger.warn("[friction-guard] Could not load evidence registry:", e);
     }
@@ -575,7 +581,8 @@ export default {
           writeProfile(profile);
 
           // Build injection
-          const injection = buildConstraintPrompt(profile) + buildFrictionNote(assessment.level);
+          const coldStartBlock = buildColdStartPrompt(profile.baseline.turnCount);
+          const injection = coldStartBlock + buildConstraintPrompt(profile) + buildFrictionNote(assessment.level);
 
           // Background analysis
           if (Date.now() - _lastBackgroundRun > BACKGROUND_INTERVAL_MS) {

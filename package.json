@@ -1,6 +1,6 @@
 {
   "name": "openclaw-friction-guard",
-  "version": "3.3.0",
+  "version": "3.4.0",
   "description": "Evidence-based interaction friction detection and constraint enforcement for OpenClaw agents. Learns relational mismatch patterns and injects pre-generation constraints to improve agent communication quality.",
   "keywords": [
     "openclaw",

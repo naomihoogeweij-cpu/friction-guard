@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.4.0 (2026-03-21)
+
+### Cold-start situation-first protocol
+- New `cold-start-priming.ts`: injects contrastive few-shot examples during early interactions (turnCount < 5)
+- New `context-priming-examples.json`: 4 bilingual examples (NL+EN) derived from real friction-guard incidents
+- Each example shows a question where the literal reading diverges from the situational reading
+- Principles: situation before words, data before interpretation, stop on correction, attempt lookup before claiming inability
+- Priming block automatically removed once the profile has enough calm interactions to establish a baseline
+- Loaded at startup alongside evidence registry and dictionaries
+
 ## 3.3.0 (2026-03-21)
 
 ### Agent-side irritation detection

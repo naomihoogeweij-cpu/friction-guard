@@ -1,4 +1,4 @@
-# Friction Guard v3.0.0
+# friction-guard v3.4.0
 ## Functionele en technische beschrijving
 
 ---
@@ -7,145 +7,234 @@
 
 ## 1. Wat het probleem is
 
-De meeste interactiefouten van AI-agents zijn geen kennisfouten. Een antwoord kan inhoudelijk correct zijn en toch frictie opleveren: te veel uitleg op een kwetsbaar moment, ongevraagd advies wanneer iemand gehoord wil worden, opsommingen waar proza past, of dezelfde zinnen die keer op keer terugkomen. Dit zijn relationele mismatches die, wanneer ze zich herhalen, vertrouwen ondermijnen — ook als het model technisch "slim" is.
+De meeste interactiefouten van AI-agents zijn geen kennisfouten. Een antwoord kan inhoudelijk correct zijn en toch frictie opleveren: te veel uitleg op een kwetsbaar moment, ongevraagd advies wanneer iemand gehoord wil worden, opsommingen waar proza past, of dezelfde zinnen die keer op keer terugkomen. Dit zijn relationele mismatches die, wanneer ze zich herhalen, vertrouwen ondermijnen — ook als het model technisch capabel is.
 
 Het gangbare patroon bij agents is: de gebruiker corrigeert, de agent zegt "sorry, ik doe het beter", en de volgende keer gebeurt precies hetzelfde. De correctie is session-scoped en verdampt bij de volgende interactie. Er is geen leerproces, geen geheugen voor wat niet werkte, en geen mechanisme om herhaling te voorkomen.
 
 ## 2. Wat friction-guard doet
 
-Friction-guard is een plugin voor OpenClaw die interactiepatronen leert en op basis daarvan het gedrag van de agent aanpast — niet door output achteraf te filteren, maar door constraints mee te geven aan het model vóór generatie.
+friction-guard is een plugin voor OpenClaw die interactiepatronen leert en op basis daarvan het gedrag van de agent aanpast — niet door output achteraf te filteren, maar door constraints mee te geven aan het model vóór generatie.
 
-De plugin doet vier dingen:
+De plugin doet vijf dingen:
 
-**Meten:** Bij elk inkomend bericht analyseert de plugin het taalgebruik van de gebruiker op signalen van frictie — van subtiele verschuivingen (kortere berichten, wegvallen van begroetingen) tot expliciete irritatie (correcties, ontkenningen, scheldwoorden). Elk signaal wordt gewogen tegen een persoonlijke baseline: wat voor deze gebruiker normaal is.
+**Meten (gebruikerskant):** Bij elk inkomend bericht analyseert de plugin het taalgebruik van de gebruiker op signalen van frictie — van subtiele verschuivingen (kortere berichten, wegvallen van begroetingen) tot expliciete irritatie (correcties, ontkenningen, scheldwoorden). Elk signaal wordt gewogen tegen een persoonlijke baseline: wat voor deze gebruiker normaal is. Daarnaast biedt de Nederlandse Grievance Dictionary (Van der Vegt et al., 2021) 556 Nederlandse en 464 Engelse gestemde woorden over vier frictie-relevante categorieën.
 
-**Onthouden:** Frictiesignalen worden opgeslagen als signatures — gewogen scores per categorie (cliché-empathie, ongevraagd advies, helpdesk-toon, overmatige uitleg, opsommingen, herhaling). Deze scores persisteren tussen sessies en bouwen geleidelijk op.
+**Meten (agentkant):** De plugin detecteert ook irritante patronen in de eigen output van de agent via een statisch irritatieregister van ~100 zinnen over zeven evidence-based categorieën. Een LLM post-hoc classifier en een statistische patroonminer ontdekken doorlopend nieuwe irritante patronen uit interactiedata.
 
-**Begrenzen:** Wanneer een signature een drempelwaarde overschrijdt, wordt een constraint geactiveerd. De constraint gaat als instructie mee in de system-context van het model. Het model weet dan, vóórdat het begint te genereren, wat het niet moet doen.
+**Onthouden:** Frictiesignalen worden opgeslagen als signatures — gewogen scores per categorie (cliché-empathie, ongevraagd advies, helpdesk-toon, overuitleg, opsommingen, herhaling). Deze scores persisteren over sessies en accumuleren geleidelijk. Dynamische bans ontdekt door de classifier en miner worden opgeslagen in een kandidatenbank en gepromoveerd wanneer bevestigd.
 
-**Verouderen:** Constraints die langere tijd niet getriggerd worden, verliezen geleidelijk aan kracht en worden uiteindelijk gedeactiveerd. Temporele bans op specifieke frases verlopen na een instelbare periode. Het systeem ossificeert niet.
+**Begrenzen:** Wanneer een signature een drempelwaarde overschrijdt, wordt een constraint geactiveerd. Gebannen zinnen — uit statisch bewijs, LLM-geclassificeerde patronen en door de miner ontdekte n-grammen — worden geïnjecteerd als HARD BAN-sectie vóór alle andere constraints. Het model weet, voordat het begint met genereren, wat het niet moet doen.
 
-## 3. De evidence-basis
+**Verouderen:** Constraints die langere tijd niet getriggerd worden verliezen geleidelijk kracht. Temporele bans verlopen na een configureerbare periode. Miner-kandidaten die binnen 30 dagen niet opnieuw geobserveerd worden, worden opgeruimd. Het systeem verstart niet.
 
-De frictiedetectie is gebaseerd op vier kennisdomeinen:
+## 3. De wetenschappelijke basis
 
-### 3.1 Klinische agitatieschalen
+### 3.1 Gebruikerskant: klinische agitatieschalen
 
-De Cohen-Mansfield Agitation Inventory (CMAI; Cohen-Mansfield, 1986) en de Modified Agitation Severity Scale (MASS) meten agitatie in vijf domeinen, waarvan het verbale domein relevant is voor tekst-gebaseerde interactie. Garriga et al. (2016) beschrijven de escalatiereeks die voorafgaat aan agitatie: vijandige stemming, toenemende onrust, luider spreken, verbale dreigementen. Deze escalatiestructuur — van subtiel naar manifest naar agressief — vormt de basis voor het vier-niveau severity model.
+De Cohen-Mansfield Agitation Inventory (CMAI; Cohen-Mansfield, 1986) meet agitatie over vijf domeinen. Garriga et al. (2016) beschrijven de escalatiesequentie voorafgaand aan agitatie: vijandige stemming, toenemende onrust, luider spreken, verbale dreigementen. Deze escalatiestructuur vormt de basis voor het vierniveau-ernstmodel.
 
-*Bronnen:*
-- Cohen-Mansfield, J. (1986). Agitated behaviors in the elderly: II. Preliminary results in the cognitively deteriorated. *Journal of the American Geriatrics Society, 34*(10), 722-727.
-- Garriga, M., et al. (2016). Assessment and management of agitation in psychiatry: Expert consensus. *The World Journal of Biological Psychiatry, 17*(2), 86-128.
+### 3.2 Gebruikerskant: linguïstische markeranalyse
 
-### 3.2 Linguïstische marker-analyse (LIWC en Grievance Dictionary)
+LIWC-22 (Boyd et al., 2022) biedt gevalideerde woordlijsten voor negatieve emotie en woede. De Grievance Dictionary (Van der Vegt et al., 2021) voegt granulaire categorieën toe — frustratie, wanhoop, grief, haat — met beoordeelde goodness-of-fit scores. De Nederlandse vertaling is direct geïntegreerd: 556 gestemde woorden met LIWC-stijl prefix-matching en voorgecompileerde regexes.
 
-LIWC-22 (Pennebaker) biedt gevalideerde woordenlijsten voor negatieve emotie, woede, en aanverwante psychologische categorieën. De Grievance Dictionary (Van Broekhuizen et al., 2021) voegt granulairere categorieën toe — frustratie, grievance, paranoia — elk positief gecorreleerd met LIWC's negatieve-emotiecategorie maar fijnmaziger. De hiërarchische structuur van LIWC (woede ⊂ negatieve emotie ⊂ affect) biedt een conceptueel raamwerk voor het toekennen van severity-niveaus aan verbale markers.
+### 3.3 Gebruikerskant: frustratiedetectie in mens-agentinteractie
 
-*Bronnen:*
-- Boyd, R. L., et al. (2022). The development and psychometric properties of LIWC-22. *University of Texas at Austin*.
-- Van Broekhuizen, M., et al. (2021). The Grievance Dictionary: Understanding threatening language use. *Behavior Research Methods*.
+Hernandez Caralt et al. (COLING 2025) identificeren vier kernmarkers: herhaling van verzoeken, ontkenning, lange onopgeloste gesprekken en ontevredenheid zonder openlijke vijandigheid. Hinrichs & Le (2018) bevestigden dat n-gram tokenisatie met stemming de beste classificatieresultaten opleverde — de basis voor de herhalingsdetectiemodule.
 
-### 3.3 Frustratiedetectie in mens-agent interactie
+### 3.4 Gebruikerskant: nomothetisch vs. idiografisch
 
-Onderzoek naar frustratiedetectie in task-oriented dialog systems (COLING 2025, Industry Track) identificeert vier kernmarkers: herhaling van verzoeken, gebruik van ontkenning, lange onopgeloste conversaties, en algemene ontevredenheid zonder openlijke vijandigheid. Cruciaal: simpele keyword-matching voor scheldwoorden bleek ineffectief omdat het de meerderheid van gefrustreerde gebruikers mist die geen expliciet taalgebruik hanteren. De studie bevestigt dat contextuele analyse (LLM-based of patroon-gebaseerd) significant beter presteert dan lexicale methoden.
+Fisher et al. (2025) maken onderscheid tussen modellen op populatieniveau (between-people) en op individueel niveau (in-person). Idiografische modellen getraind per persoon leveren lagere voorspelfouten, wat bevestigt dat een persoonlijke baseline noodzakelijk is naast markers op populatieniveau.
 
-Hinrichs & Le (2018) vergeleken text-mining technieken voor frustratiedetectie in chats met conversational agents en concludeerden dat machine learning methoden (MLP, Naïve Bayes) keyword-gebaseerde methoden overtreffen, maar dat n-gram tokenisatie met stemming de beste classificatieresultaten opleverde — de basis voor de n-gram herhalingsdetectie in deze plugin.
+### 3.5 Agentkant: zeven categorieën van agentgeroepen frictie
 
-*Bronnen:*
-- "Stupid robot, I want to speak to a human!" User Frustration Detection in Task-Oriented Dialog Systems. *COLING 2025, Industry Track.*
-- Hinrichs, H., & Le, N.-T. (2018). Which text-mining technique would detect most accurate user frustration in chats with conversational agents? *32nd International BCS Human Computer Interaction Conference*.
+**Sycophancy** — valse bevestiging, overmatig instemmen. Sharma et al. (2023, Anthropic) toonden pervasief sycofantisch gedrag aan bij vijf assistenten, gedreven door RLHF-beloningssignalen.
 
-### 3.4 Nomothetisch vs. idiografisch: de twee-pipeline architectuur
+**Valse menselijkheid** — performatieve empathie zonder inhoud. Zheng et al. (2024, Emerald) identificeerden dit als apart faalmechanisme. Gebruikers rapporteerden zich verraden te voelen, niet getroost.
 
-Recent onderzoek naar NLP-gebaseerde emotiedetectie (PMC, 2025) maakt precies het onderscheid dat deze plugin implementeert: nomothetische modellen (between-people, groepsniveau — wat irriteert mensen in het algemeen) versus idiografische modellen (in-person, individueel niveau — wat wijkt af van de baseline van deze specifieke persoon). De bevinding: idiografische modellen die per persoon getraind werden, leverden lagere voorspelfouten op. Dit bevestigt dat een universele irritatiedetector onvoldoende is; een persoonlijke baseline is noodzakelijk.
+**Helpdesk-vulling** — lege responsiviteit. Ozuem et al. (2024) vonden dat generieke antwoorden worden ervaren als een gebrek aan erkenning van de situatie.
 
-*Bron:*
-- Using Natural Language Processing to Track Negative Emotions in the Daily Lives of Adolescents. *PMC, 2025.* (EMA-studie, 97 adolescenten, Random Forest + Elastic Net op LIWC/VADER/GPT-features.)
+**Overuitleg** — paternalistische uitweiding. Bullet-points bij emotionele onderwerpen, ongevraagde pedagogische framing.
 
-## 4. Het vier-niveau severity model
+**Incorrecte reparatie** — een correctie erkennen zonder te veranderen. Pavone et al. (2023) beschrijven dit als een kritiek falen dat intense negatieve reacties oproept.
 
-Op basis van de bovenstaande evidence is een taxonomie opgebouwd met vier niveaus:
+**Emotionele incongruentie** — het verkeerde register op het verkeerde moment. Brendel et al. (2023) toonden aan dat mensachtige signalen frustratie versterken bij foutieve interacties. Crolic et al. (2022) bevestigden: warmte werkt averechts bij boze gebruikers.
 
-**Niveau 0 — Neutraal.** Baseline taalgebruik, geen afwijking. De plugin leert hiervan: alleen kalme interacties worden gebruikt om de persoonlijke baseline bij te werken.
+**Premature oplossing** — springen naar fixes vóór luisteren. Weiler et al. (2023) lieten zien dat oplossingsgerichte berichten scoren op competentie maar niet op warmte.
 
-**Niveau 1 — Subtiele frictie.** Structurele en pragmatische verschuivingen zonder expliciet negatieve woorden. Voorbeelden: abrupte verkorting van berichten (>50% korter dan baseline), wegvallen van begroetingen die eerder aanwezig waren, herhaling van dezelfde vraag. Diagnostische waarde is hoog maar de signalen zijn individueel zwak — pas bij clustering (meerdere level-1 signalen in kort tijdsbestek) worden ze betekenisvol.
+## 4. Het vierniveau-ernstmodel
 
-**Niveau 2 — Manifeste irritatie.** Expliciete correctie ("dat zei ik al"), ontkenning ("nee, dat bedoel ik niet"), imperatief taalgebruik ("stop", "luister"), sarcasme, exasperatie ("dit slaat nergens op"), en dreiging tot disengagement ("laat maar", "ik doe het zelf wel"). Deze markers activeren constraints en temporal bans op agent-patronen.
+**Niveau 0 — Neutraal.** Baseline taalgebruik. Alleen kalme interacties updaten de persoonlijke baseline.
 
-**Niveau 3 — Verbale agressie.** Hostile labels ("debiel", "nutteloos"), gerichte profanity, en expliciete terminatie-eisen ("ik stop ermee", "ga weg"). Volledige constraint-activatie. De plugin reageert niet defensief of verontschuldigend maar minimaliseert de response.
+**Niveau 1 — Subtiele frictie.** Structurele verschuivingen: berichtverkorting (>50% korter dan baseline), wegvallen begroetingen, herhaling van vragen. Individueel zwak — betekenisvol alleen bij clustering.
 
-## 5. Evidence registry
+**Niveau 2 — Manifeste irritatie.** Expliciete correctie, ontkenning, gebiedende wijs, sarcasme, uitputting, dreigingen om te stoppen. Activeert constraints en temporele bans.
 
-De frictiedetectie werkt op basis van een registry van 16 entries, verdeeld over de vier niveaus en twee talen (Nederlands en Engels). Naast user-markers bevat de registry ook agent-trigger entries: patronen die de agent zelf produceert en die irritatie veroorzaken. Deze worden gedetecteerd in de context van de sessie en verhogen de bijbehorende signatures.
+**Niveau 3 — Verbale agressie.** Vijandige labels, gerichte scheldwoorden, beëindigingseisen. Volledige constraint-activatie.
 
-Voorbeelden van agent-triggers:
-- Cliché-empathie: "ik hoor je", "ik begrijp het", "je staat er niet alleen voor"
-- Helpdesk-filler: "wil je dat ik", "laat maar weten", "goeie vraag"
-- Premature structuur: "stap 1", "stap 2", "aanpak:" (in emotionele context zonder expliciete adviesvraag)
+## 5. Evidence-registers
+
+### 5.1 Gebruikerskant (friction-evidence.json)
+
+16 entries over vier niveaus, tweetalig (NL+EN). Drie typen: patroon-gematchte verbale markers, berekende structurele markers en agent-trigger entries.
+
+### 5.2 Grievance Dictionary (grievance-dictionary.json)
+
+556 NL / 464 EN gestemde woorden uit Van der Vegt et al. (2021). Vier categorieën: frustratie, wanhoop, grief, haat. Severity-mapping: 7–10 rating → 0.3–0.9 frictie-ernst. LIWC-stijl prefix-matching. Early exit per categorie (max 3 matches). CC BY 4.0 gelicenseerd.
+
+### 5.3 Agentkant (agent-irritation-registry.json)
+
+~100 NL/EN zinnen over zeven categorieën (§3.5). Elk gekoppeld aan frictieniveau, ernst, constraints en primaire signatuur. Contextbewust: emotionele incongruentie en premature oplossing vuren alleen wanneer gebruikersfrictie ≥ 1.
 
 ## 6. Constraint-typen
 
-| Constraint | Trigger | Wat het model meekrijgt |
+| Constraint | Trigger | Wat het model ontvangt |
 |---|---|---|
-| BAN_CLICHE_PHRASES | signature cliche_empathy ≥ 0.7 | Lijst van specifiek verboden frases + instructie om varianten te vermijden |
-| NO_HELPDESK | signature helpdesk_tone ≥ 0.6 | Instructie om niet in helpdeskstijl te antwoorden, geen optiemenu's aan te bieden |
-| NO_UNASKED_ADVICE_EMOTIONAL | signature premature_advice ≥ 0.7 | Bij emotionele context zonder adviesvraag: geen advies, stappen of plannen |
-| DEFAULT_PROSE | signature bullet_mismatch ≥ 0.7 | Schrijf in proza, geen opsommingen of genummerde lijsten tenzij gevraagd |
-| MAX_LEN_600 | signature over_explain ≥ 0.7 | Maximaal 600 tekens |
-| NO_REPETITION | signature repetition ≥ 0.6 | Herhaal geen zinnen of ideeën uit eerdere berichten |
+| HARD BAN | Elke actieve gebannen zin | Specifieke zinnenlijst, niet-onderhandelbaar, eerste regel |
+| BAN_CLICHE_PHRASES | cliche_empathy ≥ 0.7 | Vermijd performatieve empathie |
+| NO_HELPDESK | helpdesk_tone ≥ 0.6 | Geen helpdesk-vulzinnen |
+| NO_UNASKED_ADVICE_EMOTIONAL | premature_advice ≥ 0.7 | Geen advies in emotionele context |
+| DEFAULT_PROSE | bullet_mismatch ≥ 0.7 | Alleen proza, geen opsommingen tenzij gevraagd |
+| MAX_LEN_600 | over_explain ≥ 0.7 | Maximaal 600 tekens |
+| NO_REPETITION | repetition ≥ 0.6 | Geen herhaalde zinnen of ideeën |
 
-## 7. Wat de plugin niet doet
+## 7. Dynamische ban-ontdekking
 
-- Geen deterministische output-filtering. De constraints zijn instructies aan het model, geen harde regex. Een sterk model volgt ze betrouwbaar; een zwakker model kan ze negeren.
-- Geen emotieherkenning in de klassieke zin. De plugin detecteert frictie-patronen, niet emoties. Het onderscheid is bewust: frictie is een relationeel fenomeen op de grens tussen agent en gebruiker, niet een eigenschap van de gebruiker.
-- Geen LLM-calls in de pipeline. Alle detectie is deterministisch (patroonmatching, n-gram similariteit, numerieke berekening). De enige LLM-interactie is de constraint-injectie zelf, die meegaat in de reguliere prompt.
+### 7.1 LLM post-hoc classifier (agent-irritation-classifier.ts)
+
+Draait dagelijks. Extraheert (agent-turn, geïrriteerde-gebruikersreactie) paren uit incidentlogs voor niveau 2+ events. Stuurt maximaal 10 paren per keer naar het model met een gestructureerde classificatieprompt. Het model identificeert problematische substrings, wijst categorieën en ernst toe. Zinnen die ≥3 keer geflagd worden over aparte incidenten promoveren naar de dynamische banlijst. Kandidaten verlopen na 30 dagen.
+
+### 7.2 Retroactieve patroonminer (agent-pattern-miner.ts)
+
+Draait elke 15 minuten. Extraheert bigrammen, trigrammen en 4-grammen uit agentresponses. Volgt per n-gram: frictietelling (vóór niveau 2+), kalmtetelling (vóór niveau 0), totaal. Promotiecriteria: ≥5 observaties, ≥60% frictiepercentage, ≥2x lift boven baseline. Stop-word filtering (NL+EN). Puur statistisch — geen LLM.
+
+### 7.3 Ban-convergentie
+
+Statische evidence-bans (TTL-gebonden), classifier-gepromoveerde bans en miner-gepromoveerde patronen worden samengevoegd in één HARD BAN-sectie bovenaan de constraint-prompt.
+
+## 8. Cold-start situation-first protocol
+
+Wanneer een gebruikersprofiel nieuw is (minder dan 5 kalme interacties), heeft de plugin geen baseline en geen geleerde constraints. Dit is de fase waarin frame-errors het meest waarschijnlijk zijn: het model kent de persoon nog niet en kan de situatie achter de letterlijke vraag verkeerd lezen.
+
+Tijdens cold start injecteert de plugin een `[SITUATION-FIRST PROTOCOL]` blok in de systeemcontext met contrastieve few-shot voorbeelden. Elk voorbeeld toont een vraag waar de letterlijke lezing afwijkt van de situationele lezing — en het principe dat het oplost. Bijvoorbeeld: "Moet ik lopen of rijden naar de wasstraat?" is geen vraag over hoe de persoon moet reizen, maar over hoe de auto er komt.
+
+Het priming-blok wordt automatisch verwijderd zodra het profiel genoeg kalme interacties heeft om een betekenisvolle baseline te vormen. De voorbeelden worden onderhouden in `context-priming-examples.json` en zijn afgeleid van echte friction-guard incidenten waar de hoofdoorzaak een frame-error was, geen kennisfout.
+
+## 9. Wat de plugin niet doet
+
+- Geen deterministische output-filtering. Constraints zijn instructies aan het model, geen regex-filters.
+- Geen emotieherkenning. De plugin detecteert frictiepatronen, geen emoties.
+- Geen LLM-aanroepen in de real-time pipeline. De classifier draait offline (dagelijks).
 
 ---
 
 # Deel II — Technische beschrijving
 
-## 1. Plugin-architectuur
+## 1. Installatie
 
-### 1.1 OpenClaw plugin API
+### Via OpenClaw CLI
 
-De plugin exporteert een object:
+```bash
+openclaw plugins install openclaw-friction-guard
+openclaw plugins enable friction-guard
+```
 
-```typescript
-export default {
-  id: "friction-guard",
-  name: "Friction Guard",
-  configSchema: {},
-  register(api) { ... }
+### Handmatige installatie
+
+```bash
+git clone https://github.com/naomihoogeweij-cpu/friction-guard.git
+mkdir -p ~/.openclaw/extensions/friction-guard
+cp src/index.ts ~/.openclaw/extensions/friction-guard/
+
+mkdir -p ~/.openclaw/workspace/interaction
+cp src/friction-policy.ts src/friction-evidence.json \
+   src/grievance-dictionary.json src/grievance-matching.ts \
+   src/agent-irritation-registry.json src/agent-irritation-matching.ts \
+   src/agent-irritation-classifier.ts src/agent-pattern-miner.ts \
+   src/cold-start-priming.ts src/context-priming-examples.json \
+   src/incident-log.ts src/repetition-detection.ts \
+   src/background-analysis.ts \
+   ~/.openclaw/workspace/interaction/
+
+mkdir -p ~/.openclaw/workspace/memory/{interaction-profiles,incident-logs,turn-history,classifier,pattern-miner}
+
+# Fix imports voor server-padindeling
+sed -i 's|from "./|from "../../workspace/interaction/|g' \
+  ~/.openclaw/extensions/friction-guard/index.ts
+
+# Plugin-manifest aanmaken
+cat > ~/.openclaw/extensions/friction-guard/openclaw.plugin.json << 'EOF'
+{
+  "name": "friction-guard",
+  "id": "friction-guard",
+  "version": "3.3.0",
+  "description": "Evidence-based frictiedetectie en pre-generatie constraint-handhaving voor interactiekwaliteit.",
+  "entry": "index.ts",
+  "configSchema": {},
+  "activation": { "event": "agent.start" }
 }
+EOF
+
+openclaw plugins enable friction-guard
+systemctl --user restart openclaw-gateway
 ```
 
-De `register` functie ontvangt het OpenClaw `api` object en registreert één hook:
+### Verificatie
 
-```typescript
-api.on("before_prompt_build", (event, ctx) => { ... }, { priority: 50 });
+```bash
+openclaw plugins list | grep friction
 ```
 
-Deze hook vuurt na session load (messages zijn beschikbaar) maar vóór model-generatie. De plugin retourneert een object met optioneel `prependSystemContext` — tekst die vóór de user-messages in de system-context wordt geïnjecteerd.
-
-### 1.2 Bestandsstructuur en verantwoordelijkheden
-
+Verwachte startup-log:
 ```
-index.ts                     → Plugin entry, hook registratie, orchestratie
-friction-policy.ts           → Types, evidence loader, profielbeheer, constraint inference
-friction-evidence.json       → Evidence registry (data)
-incident-log.ts              → Fragment logging, query helpers
-repetition-detection.ts      → N-gram herhalingsdetectie, turn history
-background-analysis.ts       → Periodieke clusteranalyse
+[friction-guard] v3.4.0 — pre-generation constraint injection
+[friction-guard] Evidence registry: 16 entries loaded
+[friction-guard] Grievance dictionary loaded: 556 NL / 464 EN stems
+[friction-guard] Agent irritation registry loaded: 7 categories, ~160 patterns
+[friction-guard] Cold-start priming loaded: 4 contrastive examples
+[friction-guard] Registered on before_prompt_build
 ```
 
-### 1.3 Dataflow per request
+## 2. Bestandsstructuur
 
 ```
-User-bericht binnenkomst
+~/.openclaw/extensions/friction-guard/
+├── index.ts                          → Plugin-entry, hook, orchestratie
+└── openclaw.plugin.json              → Plugin-metadata
+
+~/.openclaw/workspace/interaction/
+├── friction-policy.ts                → Types, evidence-loader, profielbeheer
+├── friction-evidence.json            → Gebruikerskant evidence-register (16 entries)
+├── grievance-dictionary.json         → Grievance Dictionary (556 NL / 464 EN stems)
+├── grievance-matching.ts             → LIWC-stijl stem-matching
+├── agent-irritation-registry.json    → Agentkant patronen (7 categorieën, ~100 zinnen)
+├── agent-irritation-matching.ts      → Statische agent-output matcher
+├── agent-irritation-classifier.ts    → LLM post-hoc classifier (dagelijks)
+├── agent-pattern-miner.ts            → Statistische n-gram miner (elke 15 min)
+├── cold-start-priming.ts             → Situation-first protocol (turnCount < 5)
+├── context-priming-examples.json     → Contrastieve few-shot voorbeelden voor cold start
+├── incident-log.ts                   → Fragment-logging
+├── repetition-detection.ts           → N-gram Jaccard-gelijkenis
+└── background-analysis.ts            → Periodieke clusteranalyse
+
+~/.openclaw/workspace/memory/
+├── interaction-profiles/{userId}.json
+├── incident-logs/{userId}.json
+├── turn-history/{userId}.json
+├── classifier/classifier-state.json
+└── pattern-miner/miner-state.json
+```
+
+## 3. Dataflow per verzoek
+
+```
+Gebruikersbericht komt binnen
         │
         ▼
 before_prompt_build hook vuurt
         │
+        ▼
+stripChannelMetadata(text)        ← verwijder WhatsApp/kanaal-envelope,
+        │                            media-markers, tool-instructies
         ▼
 extractLastUserMessage(messages)
         │
@@ -153,98 +242,76 @@ extractLastUserMessage(messages)
 readProfile(userId)
         │
         ├──► cleanExpiredBans()
-        │
         ├──► recordTurn(userId, "user", text)
         │
-        ├──► detectUserForcedRepetition(text, userId)
-        │        └──► bij match: signature.repetition += 0.10, logFragment()
+        ├──► assessFriction(text, profile, lang)
+        │        ├──► matchUserInput()            ── evidence-patronen (NL+EN)
+        │        ├──► computeStructuralMarkers()  ── verkorting, begroetingsverlies
+        │        ├──► computeBaselineDeviation()   ── persoonlijke baseline-afwijking
+        │        ├──► matchGrievance()             ── Grievance Dictionary stems
+        │        └──► samenvoegen: niveau, entries, constraints, signature-updates
         │
-        ├──► assessFriction(text, profile)
-        │        ├──► matchUserInput() ── evidence pattern matching (NL+EN)
-        │        ├──► computeStructuralMarkers() ── berichtverkorting, greeting dropout
-        │        ├──► computeBaselineDeviation() ── afwijking van persoonlijke baseline
-        │        └──► return { level, matchedEntries, deviation, signatureUpdates, constraints }
+        ├──► detectUserForcedRepetition()  ← overgeslagen als niveau ≥ 2
         │
-        ├──► apply signature updates
-        ├──► activate constraints
-        ├──► logFragment() bij level > 0
-        ├──► addBan() voor agent-patronen bij level ≥ 2
-        ├──► updateBaseline() alleen bij level 0
-        ├──► inferConstraints(profile) ── signature → constraint promotie
+        ├──► signature-updates toepassen
+        ├──► constraints activeren
+        ├──► logFragment() als niveau > 0
+        ├──► addBan() voor agent-patronen bij niveau ≥ 2
+        ├──► updateBaseline() alleen bij niveau 0
+        ├──► inferConstraints(profile)
         ├──► writeProfile()
         │
-        ├──► buildConstraintPrompt(profile) ── constraints → tekst
-        ├──► buildFrictionNote(level) ── friction-niveau → model-instructie
+        ├──► buildConstraintPrompt(profile)
+        │        ├──► statische bans (TTL-gebonden)
+        │        ├──► getPromotedBans()     ← classifier
+        │        ├──► getMinedPatterns()     ← miner
+        │        └──► samenvoegen → HARD BAN (eerste regel) + constraint-regels
         │
-        ├──► runBackgroundAnalysis() elke 15 min
+        ├──► buildColdStartPrompt(turnCount) ← situation-first priming als turnCount < 5
+        │
+        ├──► buildFrictionNote(level)
+        │
+        ├──► [elke 15 min] runBackgroundAnalysis() + runPatternMining()
+        ├──► [elke 24u]    runClassification() via api.complete
         │
         ▼
-return { prependSystemContext: constraintPrompt + frictionNote }
-        │
-        ▼
-Model genereert met constraints in system-context
+return { prependSystemContext: coldStartBlock + constraintPrompt + frictionNote }
 ```
 
-## 2. Evidence registry (friction-evidence.json)
+## 4. Input-sanitisatie
 
-### 2.1 Schema
+`stripChannelMetadata()` verwijdert:
+- `Conversation info (untrusted metadata):` + omheinde JSON-blokken
+- `Sender (untrusted metadata):` + omheinde JSON-blokken
+- Media-markers: `[media attached: ...]`, `[audio message]`, etc.
+- Tool-instructieblokken: "To send an image back...", systeeminstructies
+- Cron/heartbeat wrapper-regels
+
+## 5. Evidence-registerschema
 
 ```typescript
 interface EvidenceEntry {
-  id: string;                    // "L2-001", "AGENT-002", etc.
-  level: 0 | 1 | 2 | 3;        // severity level
-  severity: number;              // 0..1, gewicht binnen het level
+  id: string;                    // "L2-001", "AGENT-002"
+  level: 0 | 1 | 2 | 3;
+  severity: number;              // 0..1
   type: "structural" | "verbal" | "agent_trigger";
-  marker: string;                // identifier voor het patroontype
-  description?: string;          // mensleesbare beschrijving
-  patterns?: Record<string, string[]>;  // taal → frase-array
-  detection: "pattern" | "pattern_plus_context" | "computed" | "semantic_similarity";
+  marker: string;
+  patterns?: Record<string, string[]>;  // taal → zinnen
+  detection: "pattern" | "computed" | "pattern_plus_context" | "semantic_similarity";
   contexts: ("emotional" | "technical" | "neutral")[];
   suggestedConstraints: Constraint[];
-  notes?: string;                // evidence-verwijzing
 }
 ```
 
-### 2.2 Detectiemethoden
-
-- **pattern:** Exacte substring-match (case-insensitive) van de user-input tegen de patterns in de registry. Snel en deterministisch. Taalafhankelijk (NL/EN).
-- **computed:** Structurele markers die berekend worden uit berichteigenschappen (lengte, zinsaantal) vergeleken met de baseline. Niet lexicaal.
-- **pattern_plus_context:** Patroonmatch plus contextbepaling (voor sarcasme). In de huidige versie pattern-only; contextanalyse is een toekomstige uitbreiding.
-- **semantic_similarity:** Placeholder. Vereist embedding-based cosine-similariteit. Niet geïmplementeerd.
-
-### 2.3 Taaldetectie
-
-```typescript
-function detectLanguage(text: string): "nl" | "en" {
-  const nlMarkers = /\b(ik|je|het|een|dat|niet|maar|ook|wel|nog|van|voor|naar|dit|wat)\b/gi;
-  const matches = text.match(nlMarkers) || [];
-  return matches.length >= 2 ? "nl" : "en";
-}
-```
-
-Simpele heuristiek op Nederlandse functiewoorden. Voldoende voor de huidige use case (primair Nederlandstalige gebruiker).
-
-## 3. Profiel (UserProfile)
-
-### 3.1 Schema
+## 6. Profielschema
 
 ```typescript
 interface UserProfile {
   userId: string;
   updatedAt: string;
   signatures: Record<Signature, number>;  // 6 categorieën, elk 0..1
-  constraints: {
-    id: Constraint;
-    enabled: boolean;
-    confidence: number;
-    lastTriggered?: string;
-  }[];
-  bannedPhrases: {
-    phrase: string;
-    severity: number;
-    source: string;        // evidence entry id
-    expiresAt: string;     // ISO timestamp
-  }[];
+  constraints: { id: Constraint; enabled: boolean; confidence: number; lastTriggered?: string; }[];
+  bannedPhrases: { phrase: string; severity: number; source: string; expiresAt: string; }[];
   baseline: {
     avgMessageLength: number;
     avgSentenceCount: number;
@@ -254,227 +321,70 @@ interface UserProfile {
     turnCount: number;
   };
   currentFrictionLevel: 0 | 1 | 2 | 3;
-  recentTurnLengths: number[];  // sliding window, max 10
+  recentTurnLengths: number[];  // schuifvenster, max 10
 }
 ```
 
-### 3.2 Signature-dynamiek
+### Signature-dynamiek
 
-Signatures stijgen door frictie-detectie (incrementen per level: L1 +0.03, L2 +0.08, L3 +0.15) en dalen door:
-- Positieve interacties (niet geïmplementeerd in v3 — toekomstige uitbreiding)
-- Constraint-decay: constraints die 48 uur niet getriggerd zijn verliezen 0.02 confidence per cycle
-- Background-analyse de-escalatie: geïsoleerde level-1 fragmenten die niet terugkomen binnen 2 uur veroorzaken milde signature-decay (0.01 per categorie)
+Stijging: N1 +0,03, N2 +0,08, N3 +0,15 per gematchte entry.
+Daling: constraint-verval (48u niet getriggerd → -0,02/cyclus), achtergrond de-escalatie (geïsoleerd N1 na 2u → -0,01).
 
-### 3.3 Constraint-promotie
+### Baseline-leren
 
-```typescript
-const CONSTRAINT_THRESHOLDS = {
-  cliche_empathy:   { constraint: "BAN_CLICHE_PHRASES",            threshold: 0.7 },
-  premature_advice: { constraint: "NO_UNASKED_ADVICE_EMOTIONAL",   threshold: 0.7 },
-  bullet_mismatch:  { constraint: "DEFAULT_PROSE",                 threshold: 0.7 },
-  over_explain:     { constraint: "MAX_LEN_600",                   threshold: 0.7 },
-  helpdesk_tone:    { constraint: "NO_HELPDESK",                   threshold: 0.6 },
-  repetition:       { constraint: "NO_REPETITION",                 threshold: 0.6 },
-};
-```
+Uitsluitend bijgewerkt uit niveau-0 (kalme) interacties. Exponentieel afnemend gewicht: `alpha = min(0.1, 1/(turnCount+1))`.
 
-Lagere drempel voor helpdesk_tone en repetition: deze patronen zijn minder subjectief en vereisen minder bevestiging voordat actie gerechtvaardigd is.
+## 7. Herhalingsdetectie
 
-## 4. Baseline-systeem
+Gewogen Jaccard: `trigrammen × 0,5 + bigrammen × 0,3 + woorden × 0,2`
 
-### 4.1 Leerprincipe
+**Gebruiker geforceerde herhaling:** Drempel 0,65, minimaal 3 gedeelde trigrammen. Overgeslagen bij niveau ≥ 2.
+**Agent zelf-herhaling:** Drempel 0,55. Alleen turngeschiedenis (geen output-hook).
+**Opslag:** 30-turns schuifvenster per gebruiker, tekst afgekapt op 500 tekens.
 
-De baseline wordt uitsluitend bijgewerkt uit level-0 (kalme) interacties. Rationale: frictie-interacties vertekenen de baseline en zouden leiden tot een opwaartse drift van de "normaal"-referentie.
-
-### 4.2 Exponentieel afnemend gewicht
-
-```typescript
-const alpha = Math.min(0.1, 1 / (turnCount + 1));
-baseline = baseline * (1 - alpha) + observation * alpha;
-```
-
-Vroege interacties wegen zwaarder (het profiel moet snel kalibreren); latere interacties verschuiven de baseline steeds minder. Na 10+ turns is alpha 0.1, na 100+ turns <0.01.
-
-### 4.3 Deviatie-scoring
-
-| Marker | Conditie | Deviatie-bijdrage |
-|---|---|---|
-| Berichtverkorting | lengte < 40% van baseline | +0.20 |
-| Bericht-expansie | lengte > 250% van baseline | +0.10 |
-| Zinsvereenvoudiging | zinnen < 50% van baseline | +0.10 |
-| Uitroeptekens | >1 uitroepteken | +0.15 |
-| Vraagtekens | >2 vraagtekens | +0.10 |
-| CAPS | ≥1 woord in hoofdletters | +0.15 per woord (max 3) |
-
-Deviatie >0.35 zonder pattern-match promoveert naar level 1.
-
-## 5. Herhalingsdetectie
-
-### 5.1 Methode
-
-Gewogen Jaccard-similariteit op n-grammen:
-
-```
-similarity = trigrams * 0.5 + bigrams * 0.3 + woordoverlap * 0.2
-```
-
-Trigrams dragen het meeste gewicht omdat ze frase-niveau herhaling vangen. Stopwoorden (Nederlands + Engels) worden verwijderd vóór tokenisatie.
-
-### 5.2 Twee axes
-
-**User forced-repetition:** Vergelijkt het huidige user-bericht tegen de laatste 10 user-turns. Threshold 0.50. Detecteert wanneer de gebruiker zichzelf herhaalt omdat de agent het niet oppakte. Sterke frictie-indicator (signature.repetition += 0.10, incident gelogd op level 2).
-
-**Agent self-repetition:** Vergelijkt de agent-draft tegen de laatste 10 agent-turns. Threshold 0.55. In v3 beperkt tot turn-history bijhouden voor achtergrondanalyse (geen real-time draft-check mogelijk zonder output-hook).
-
-**Phrase-level detectie:** Isoleert specifieke zinnen (>20 tekens) in agent-output die in eerdere agent-turns voorkwamen (trigram Jaccard >0.6). Retourneert de herhaalde zinnen als lijst.
-
-### 5.3 Opslag
-
-Sliding window van 30 turns in `memory/turn-history/{userId}.json`. Tekst wordt afgekapt op 500 tekens per turn.
-
-## 6. Incident-log en achtergrondanalyse
-
-### 6.1 Incident-log
-
-Elk frictie-event boven level 0 wordt opgeslagen als fragment:
-
-```typescript
-interface IncidentFragment {
-  id: string;
-  timestamp: string;
-  userId: string;
-  source: "user" | "agent";
-  text: string;              // max 500 tekens
-  level: FrictionLevel;
-  markers: string[];
-  baselineDeviation: number;
-  constraintsActivated: Constraint[];
-  signatureDeltas: Record<Signature, number>;
-  resolved: boolean;
-  clusterKey?: string;
-  reclassifiedLevel?: FrictionLevel;
-  notes?: string;
-}
-```
-
-Rolling window van 200 fragmenten per gebruiker.
-
-### 6.2 Achtergrondanalyse
+## 8. Achtergrondanalyse
 
 Draait elke 15 minuten. Drie operaties:
+- **Temporele clustering:** fragmenten binnen 10 min gegroepeerd, effectief niveau per cluster.
+- **Escalatie:** 3+ niveau-1 in één cluster → effectief niveau 2.
+- **De-escalatie:** geïsoleerd niveau-1 zonder herhaling binnen 2u → signature-verval.
 
-**Temporele clustering:** Fragmenten binnen een 10-minuten venster worden gegroepeerd. Per cluster wordt het effectieve level bepaald.
+## 9. Temporeel ban-mechanisme
 
-**Escalatie:** 3+ level-1 fragmenten in één cluster → effectief level 2. Rationale: individueel zwakke signalen die clusteren in tijd wijzen op een opbouwend patroon dat de real-time detectie per fragment miste.
+Bij niveau 2+ worden agent-trigger zinnen gebanned met TTL: `BASE_TTL × (0,5 + severity)`. BASE_TTL = 2 uur. Verlopen bans worden opgeruimd aan het begin van elke cyclus.
 
-**De-escalatie:** Geïsoleerde level-1 fragmenten die niet terugkomen binnen 2 uur → signature-decay. Rationale: een enkel subtiel signaal zonder herhaling is meer waarschijnlijk ruis dan frictie.
+## 10. Afhankelijkheden
 
-### 6.3 Co-occurrence detectie
+Geen. Alleen Node.js standaardbibliotheek: `node:fs`, `node:path`.
 
-De achtergrondanalyse telt hoe vaak markers samen voorkomen over clusters heen. Bekende co-occurrence patronen:
+## 11. Bekende beperkingen
 
-| Patroon | Markers | Signature |
-|---|---|---|
-| Negatie + correctie | L2-001 + L2-002 | repetition |
-| Imperatief + exasperatie | L2-003 + L2-005 | helpdesk_tone |
-| Verkorting + disengagement | L1-001 + L2-006 | over_explain |
-
-## 7. Constraint-injectie
-
-### 7.1 Prompt-constructie
-
-De plugin bouwt twee tekst-blokken:
-
-**Constraint-prompt:** Genummerde lijst van actieve constraints, specifiek geformuleerd als model-instructies. Voorbeeld:
-
-```
-[INTERACTION CONSTRAINTS — active for this user based on learned preferences]
-1. Do not use cliché empathy phrases. Specifically banned: "ik hoor je", "ik begrijp het", ...
-2. Do not use helpdesk filler language. Avoid phrases like "wil je dat ik", "laat maar weten", ...
-3. Write in prose paragraphs. Do not use bullet points or numbered lists unless explicitly asked.
-4. Keep your response concise. Maximum 600 characters.
-[END CONSTRAINTS]
-```
-
-**Friction-noot:** Korte instructie gebaseerd op het huidige friction level:
-
-| Level | Instructie |
+| Beperking | Status |
 |---|---|
-| 0 | (geen) |
-| 1 | "Subtle signs of friction detected. Be precise, brief, and avoid filler." |
-| 2 | "User is showing clear irritation. Respond minimally, directly, without pleasantries or offers." |
-| 3 | "User is strongly frustrated. Respond in one or two sentences maximum. No advice, no structure, no apology." |
-
-### 7.2 Injectie-mechanisme
-
-```typescript
-return {
-  prependSystemContext: constraintPrompt + frictionNote
-};
-```
-
-OpenClaw plaatst `prependSystemContext` vóór de user-messages in de system-context. Het model ontvangt de constraints als eerste instructie-laag.
-
-## 8. Temporal ban mechanisme
-
-### 8.1 Trigger
-
-Bij level-2+ frictie worden agent-patronen gebanned die waarschijnlijk de irritatie veroorzaakten. De mapping loopt via gedeelde constraints: als een user-marker en een agent-trigger dezelfde constraint suggereren, worden de agent-trigger frases gebanned.
-
-### 8.2 TTL-berekening
-
-```typescript
-const ttl = BASE_TTL * (0.5 + severity);
-// severity 0.5 → 1.5 uur
-// severity 0.75 → 2.5 uur
-// severity 0.90 → 2.8 uur
-```
-
-BASE_TTL is 2 uur. Hogere severity = langere ban.
-
-### 8.3 Opruiming
-
-Verlopen bans worden verwijderd aan het begin van elke `before_prompt_build` cycle.
-
-## 9. Pad-resolutie
-
-Alle bestanden gebruiken `__dirname` voor pad-resolutie, waardoor de plugin onafhankelijk is van OpenClaw's werkdirectory:
-
-```
-friction-policy.ts:
-  EVIDENCE_PATH = join(__dirname, "friction-evidence.json")
-  BASE_PATH = join(__dirname, "..", "memory", "interaction-profiles")
-
-incident-log.ts:
-  LOG_DIR = join(__dirname, "..", "memory", "incident-logs")
-
-repetition-detection.ts:
-  HISTORY_DIR = join(__dirname, "..", "memory", "turn-history")
-
-index.ts (imports):
-  from "../../workspace/interaction/friction-policy"
-  → resolveert naar /root/.openclaw/workspace/interaction/friction-policy
-```
-
-## 10. Dependencies
-
-Geen externe dependencies. Alleen Node.js standaardbibliotheek:
-- `node:fs` (readFileSync, writeFileSync, existsSync, mkdirSync)
-- `node:path` (join, dirname)
-
-## 11. Bekende beperkingen en toekomstige uitbreidingen
-
-| Beperking | Toekomstige oplossing |
-|---|---|
-| Geen deterministische output-filtering | Wachten op OpenClaw `message:sending` hook (GitHub #13004) |
-| Agent self-repetition geen real-time check | Idem — vereist output-hook |
-| `question_repetition` niet geïmplementeerd | Embedding-based cosine-similariteit (>0.85 threshold) |
-| `response_latency_drop` niet geïmplementeerd | Timestamp-tracking per turn in baseline |
-| Sarcasme alleen pattern-based | Optionele offline LLM-classifier op pre-geflagde fragmenten |
-| Positieve bevestiging verlaagt signatures niet | Implementeer asymmetrische decay (zwak positief signaal, -0.01 per bevestiging) |
-| Background analysis single-user | Uitbreiden naar iteratie over alle profielen |
-| Geen auditrapportage | Export incident-log naar gestructureerd rapport voor menselijke review |
+| Geen deterministische output-filtering | Wacht op OpenClaw `message:sending` hook (#13004) |
+| LLM-classifier vereist api.complete | No-op als niet beschikbaar |
+| Patroonminer heeft data nodig | Betekenisvol na ~50+ interacties |
+| Sycophancy-detectie alleen patroongebaseerd | Classifier + miner ontdekken nieuwe patronen |
 
 ---
 
-*friction-guard v3.0.0 — Naomi Hoogeweij, Rutka, en Claude Opus. Maart 2026.*
+## Referenties
+
+Boyd, R. L., et al. (2022). *The development and psychometric properties of LIWC-22*. University of Texas at Austin.
+Brendel, A. B., et al. (2023). *JMIS, 40*(3), 883–913.
+Cohen-Mansfield, J. (1986). *JAGS, 34*(10), 722–727.
+Crolic, C., et al. (2022). *Journal of Marketing, 86*(1), 132–148.
+Fisher, A. J., et al. (2025). Preprint. doi:10.21203/rs.3.rs-6414400/v1.
+Garriga, M., et al. (2016). *World J Biol Psychiatry, 17*(2), 86–128.
+Hernandez Caralt, J., et al. (2025). *COLING 2025, Industry Track*.
+Hinrichs, H. & Le, N.-T. (2018). *32nd BCS HCI Conference*.
+Ozuem, W., et al. (2024). *Psychology & Marketing, 41*(9), 2057–2078.
+Pavone, G., et al. (2023). *J Interactive Marketing, 58*(1), 52–71.
+Sharma, M., et al. (2023). *arXiv:2310.13548*.
+Van der Vegt, I., et al. (2021). *Behavior Research Methods, 53*, 2105–2119.
+Weiler, S., et al. (2023). *Electronic Markets, 33*, Article 51.
+Zheng, Y., et al. (2024). *IT & People, 37*(8), 175–199.
+
+---
+
+*friction-guard v3.4.0 — Naomi Hoogeweij, Rutka en Claude Opus. Maart 2026.*
