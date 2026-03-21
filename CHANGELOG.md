@@ -1,5 +1,24 @@
 # Changelog
 
+## 3.3.0 (2026-03-21)
+
+### Agent-side irritation detection
+- New `agent-irritation-registry.json`: 7 evidence-based categories of LLM output patterns that empirically correlate with user frustration
+- Categories: sycophancy, fake humanity, helpdesk filler, overexplanation, incorrect repair, emotional incongruence, premature solutioning
+- ~100 NL + EN patterns grounded in: Sharma et al. (2023, Anthropic), Brendel et al. (2023, JMIS), Crolic et al. (2022), Ozuem et al. (2024), ITP/Emerald (2024), Weiler et al. (2023, Electronic Markets), Pavone et al. (2023)
+- Context-dependent matching: emotional incongruence and premature solutioning only fire when user friction level ≥ 1
+- New `agent-irritation-matching.ts`: pattern matcher for agent output
+
+### LLM post-hoc classifier (Option 3)
+- New `agent-irritation-classifier.ts`: periodic offline analysis of agent responses that preceded friction events
+- Extracts (agent-turn, user-friction-response) pairs from incident logs and turn history
+- Sends pairs to LLM for classification — identifies specific problematic phrases and categories
+- Candidate bank with running severity averages and observation counts
+- Promotion threshold: phrases flagged ≥3 times are automatically promoted to dynamic bans
+- 30-day candidate expiry for phrases that stop appearing
+- Daily execution cycle via OpenClaw's model API (when available)
+- Promoted bans merged into constraint prompt alongside static bans
+
 ## 3.2.0 (2026-03-10)
 
 ### Banned phrase enforcement

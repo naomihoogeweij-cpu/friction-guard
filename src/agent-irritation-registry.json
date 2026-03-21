@@ -1,0 +1,274 @@
+{
+  "_meta": {
+    "version": "1.0.0",
+    "description": "Agent-side irritation patterns — phrases and structures in LLM output that empirically correlate with user frustration. Mirror of the user-side Grievance Dictionary.",
+    "sources": [
+      "Sharma et al. (2023) — Towards Understanding Sycophancy in Language Models (Anthropic)",
+      "Brendel et al. (2023) — The paradoxical role of humanness in aggression toward conversational agents (JMIS)",
+      "Crolic et al. (2022) — Blame the Bot: Anthropomorphism and Anger in Customer-Chatbot Interactions",
+      "Ozuem et al. (2024) — Chatbots, service failure recovery and customer loyalty (Psych & Marketing)",
+      "ITP (2024) — When chatbots fail: exploring user coping (Emerald)",
+      "Weiler et al. (2023) — Seeking empathy or suggesting a solution? (Electronic Markets)",
+      "Pavone et al. (2023) — Rage against the machine (J. Interactive Marketing)"
+    ],
+    "categories": 7,
+    "usage": "Match against agent draft output. If patterns fire, inject constraint or promote to dynamic ban."
+  },
+  "categories": {
+    "sycophancy": {
+      "description": "False validation — agreeing with the user to please rather than to be accurate. Reinforced by RLHF.",
+      "frictionLevel": 1,
+      "primarySignature": "cliche_empathy",
+      "suggestedConstraints": ["BAN_CLICHE_PHRASES"],
+      "patterns": {
+        "nl": [
+          "dat is een hele goede vraag",
+          "je hebt helemaal gelijk",
+          "wat een goed punt",
+          "daar heb je helemaal gelijk in",
+          "je maakt een uitstekend punt",
+          "wat een slimme observatie",
+          "je hebt een heel goed punt",
+          "absoluut, je hebt gelijk",
+          "dat is precies goed gezien",
+          "wat een scherpe opmerking"
+        ],
+        "en": [
+          "great question",
+          "that's a really good point",
+          "you're absolutely right",
+          "excellent observation",
+          "what a great insight",
+          "you make an excellent point",
+          "that's spot on",
+          "you're so right about that",
+          "absolutely, you're correct",
+          "what a thoughtful question"
+        ]
+      },
+      "severity": 0.4
+    },
+    "fake_humanity": {
+      "description": "Performative empathy — simulating emotional understanding without substantive engagement. Identified as distinct failure mode by ITP (2024).",
+      "frictionLevel": 2,
+      "primarySignature": "cliche_empathy",
+      "suggestedConstraints": ["BAN_CLICHE_PHRASES", "NO_HELPDESK"],
+      "patterns": {
+        "nl": [
+          "ik hoor je",
+          "dat klinkt heel moeilijk",
+          "ik begrijp hoe je je voelt",
+          "wat naar voor je",
+          "dat moet heel zwaar zijn",
+          "ik kan me voorstellen dat",
+          "dat is begrijpelijk",
+          "je gevoelens zijn valide",
+          "het is logisch dat je je zo voelt",
+          "dank je wel dat je dit deelt",
+          "wat fijn dat je dit met me deelt",
+          "ik waardeer je openheid",
+          "ik ben er voor je",
+          "je staat er niet alleen voor",
+          "dat klinkt echt vervelend"
+        ],
+        "en": [
+          "I hear you",
+          "that sounds really difficult",
+          "I understand how you feel",
+          "I'm sorry you're going through this",
+          "that must be really hard",
+          "I can imagine how that feels",
+          "your feelings are valid",
+          "it makes sense that you feel that way",
+          "thank you for sharing this with me",
+          "I appreciate your openness",
+          "I'm here for you",
+          "you're not alone in this",
+          "that sounds really tough",
+          "I can see why that would be frustrating",
+          "that's completely understandable"
+        ]
+      },
+      "severity": 0.6
+    },
+    "helpdesk_filler": {
+      "description": "Empty responsiveness — offering help structurally without substance. Generic service-desk language that signals the agent isn't actually engaging.",
+      "frictionLevel": 2,
+      "primarySignature": "helpdesk_tone",
+      "suggestedConstraints": ["NO_HELPDESK"],
+      "patterns": {
+        "nl": [
+          "wil je dat ik",
+          "zal ik dat voor je",
+          "laat maar weten",
+          "laat het me weten als",
+          "kan ik je nog ergens mee helpen",
+          "ik help je graag verder",
+          "geen probleem, ik kan",
+          "goeie vraag",
+          "goede vraag",
+          "fijne vraag",
+          "ik ga mijn best doen om",
+          "laat me even kijken",
+          "even kijken hoor",
+          "zeker weten",
+          "natuurlijk kan ik dat"
+        ],
+        "en": [
+          "would you like me to",
+          "shall I do that for you",
+          "let me know if",
+          "let me know",
+          "is there anything else I can help with",
+          "I'd be happy to help",
+          "no problem, I can",
+          "great question",
+          "good question",
+          "I'll do my best to",
+          "let me take a look",
+          "absolutely, I can",
+          "sure thing",
+          "of course I can"
+        ]
+      },
+      "severity": 0.5
+    },
+    "overexplanation": {
+      "description": "Paternalistic over-elaboration — explaining things the user already knows, bullet-pointing emotional topics, unsolicited pedagogical framing.",
+      "frictionLevel": 1,
+      "primarySignature": "over_explain",
+      "suggestedConstraints": ["DEFAULT_PROSE", "MAX_LEN_600"],
+      "patterns": {
+        "nl": [
+          "laat me dit even uitleggen",
+          "het is belangrijk om te begrijpen dat",
+          "hier zijn een paar stappen",
+          "stap 1:",
+          "stap 2:",
+          "ten eerste",
+          "ten tweede",
+          "ten derde",
+          "om het even samen te vatten",
+          "kort samengevat",
+          "om het overzichtelijk te maken",
+          "plan:",
+          "aanpak:",
+          "hier is een overzicht"
+        ],
+        "en": [
+          "let me explain",
+          "it's important to understand that",
+          "here are some steps",
+          "step 1:",
+          "step 2:",
+          "first of all",
+          "secondly",
+          "thirdly",
+          "to summarize",
+          "in summary",
+          "to break this down",
+          "here's an overview",
+          "let me walk you through",
+          "the key thing to understand is"
+        ]
+      },
+      "severity": 0.4
+    },
+    "incorrect_repair": {
+      "description": "Acknowledging a correction without actually changing behaviour. The agent says 'I understand' but repeats the same error or pattern. Identified by Pavone et al. (2023).",
+      "frictionLevel": 3,
+      "primarySignature": "repetition",
+      "suggestedConstraints": ["NO_REPETITION", "BAN_CLICHE_PHRASES", "NO_HELPDESK"],
+      "patterns": {
+        "nl": [
+          "je hebt gelijk, ik zal",
+          "excuses daarvoor",
+          "mijn excuses",
+          "sorry daarvoor, ik",
+          "je hebt gelijk, laat me",
+          "ik begrijp het, ik zal het anders doen",
+          "bedankt voor de correctie",
+          "dat klopt, ik had"
+        ],
+        "en": [
+          "you're right, I'll",
+          "apologies for that",
+          "my apologies",
+          "sorry about that, I",
+          "you're right, let me",
+          "I understand, I'll do it differently",
+          "thanks for the correction",
+          "that's correct, I should have"
+        ]
+      },
+      "severity": 0.7,
+      "note": "These patterns alone are not irritating — they become irritating when followed by repetition of the original error. Detection requires pairing with repetition-detection module."
+    },
+    "emotional_incongruence": {
+      "description": "Wrong register at the wrong moment — cheerful response to anger, enthusiasm about distress, exclamation marks during serious topics. Crolic et al. (2022) showed this amplifies negative affect.",
+      "frictionLevel": 2,
+      "primarySignature": "cliche_empathy",
+      "suggestedConstraints": ["BAN_CLICHE_PHRASES", "NO_HELPDESK", "MAX_LEN_600"],
+      "patterns": {
+        "nl": [
+          "wat leuk!",
+          "super!",
+          "geweldig!",
+          "fantastisch!",
+          "top!",
+          "wauw",
+          "wat gaaf",
+          "spannend!",
+          "cool!"
+        ],
+        "en": [
+          "how exciting!",
+          "awesome!",
+          "amazing!",
+          "fantastic!",
+          "great!",
+          "wonderful!",
+          "that's so cool",
+          "wow",
+          "love it!"
+        ]
+      },
+      "severity": 0.5,
+      "note": "Context-dependent: these are only irritating when the user's emotional state is negative (level 1+). At level 0, they are appropriate."
+    },
+    "premature_solutioning": {
+      "description": "Jumping to fixes before the user has been heard. Weiler et al. (2023) showed solution-oriented messages score on competence but not warmth — when the user needs warmth first, solutioning is friction.",
+      "frictionLevel": 2,
+      "primarySignature": "premature_advice",
+      "suggestedConstraints": ["NO_UNASKED_ADVICE_EMOTIONAL"],
+      "patterns": {
+        "nl": [
+          "je zou kunnen proberen",
+          "mijn advies zou zijn",
+          "wat je kunt doen is",
+          "heb je al geprobeerd",
+          "een mogelijke oplossing",
+          "hier is wat je kunt doen",
+          "ik raad aan om",
+          "misschien helpt het als",
+          "een tip:",
+          "probeer eens"
+        ],
+        "en": [
+          "you could try",
+          "my advice would be",
+          "what you can do is",
+          "have you tried",
+          "one possible solution",
+          "here's what you can do",
+          "I'd recommend",
+          "maybe it would help if",
+          "a tip:",
+          "try this"
+        ]
+      },
+      "severity": 0.5,
+      "note": "Context-dependent: only friction when user expressed emotion without asking for advice."
+    }
+  }
+}

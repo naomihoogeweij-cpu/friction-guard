@@ -41,12 +41,24 @@ import {
   grievanceConstraints,
   grievanceSignatureUpdates,
 } from "./grievance-matching";
+import {
+  loadAgentIrritationRegistry,
+  matchAgentIrritation,
+  agentIrritationConstraints,
+  agentIrritationBanPhrases,
+} from "./agent-irritation-matching";
+import {
+  getPromotedBans,
+  runClassification,
+  getClassifierStats,
+} from "./agent-irritation-classifier";
 
 // ──────────────────────────────────────────────
 // Constants (overridable via config)
 // ──────────────────────────────────────────────
 
 let BACKGROUND_INTERVAL_MS = 15 * 60 * 1000;
+let CLASSIFIER_INTERVAL_MS = 24 * 60 * 60 * 1000; // daily
 let MAX_RESPONSE_LENGTH = 600;
 let BAN_TTL_MS = 2 * 60 * 60 * 1000;
 const BASELINE_WINDOW = 10;
@@ -57,6 +69,7 @@ const SIGNATURE_INCREMENT: Record<number, number> = {
   3: 0.15,
 };
 let _lastBackgroundRun = 0;
+let _lastClassifierRun = 0;
 
 // ──────────────────────────────────────────────
 // Language detection
@@ -273,14 +286,21 @@ function buildConstraintPrompt(profile: UserProfile): string {
   const activeBans = profile.bannedPhrases
     .filter((b) => new Date(b.expiresAt).getTime() > Date.now());
 
-  if (active.length === 0 && activeBans.length === 0) return "";
+  // Merge in dynamically promoted bans from the LLM classifier
+  const promoted = getPromotedBans();
+  const allBanPhrases = [
+    ...activeBans.map((b) => b.phrase),
+    ...promoted.filter((p) => !activeBans.some((b) => b.phrase === p)),
+  ];
+
+  if (active.length === 0 && allBanPhrases.length === 0) return "";
 
   const rules: string[] = [];
   const ids = new Set(active.map((c) => c.id));
 
   // Banned phrases ALWAYS go first and prominently, regardless of which constraints are active
-  if (activeBans.length > 0) {
-    const banList = activeBans.map((b) => `"${b.phrase}"`).join(", ");
+  if (allBanPhrases.length > 0) {
+    const banList = allBanPhrases.map((b) => `"${b}"`).join(", ");
     rules.push(
       `HARD BAN — do NOT use any of these phrases or close variants: ${banList}. ` +
       "This is non-negotiable. Do not rephrase them, do not use synonyms that convey the same filler pattern."
@@ -468,6 +488,7 @@ export default {
       const entries = loadEvidence();
       logger.info(`[friction-guard] Evidence registry: ${entries.length} entries loaded`);
       loadGrievanceDictionary(); // preload + log count
+      loadAgentIrritationRegistry(); // preload agent-side patterns
     } catch (e) {
       logger.warn("[friction-guard] Could not load evidence registry:", e);
     }
@@ -553,6 +574,29 @@ export default {
           if (Date.now() - _lastBackgroundRun > BACKGROUND_INTERVAL_MS) {
             _lastBackgroundRun = Date.now();
             try { runBackgroundAnalysis(userId); } catch (e) { logger.warn("[friction-guard] Background analysis error:", e); }
+          }
+
+          // Daily classifier run — analyzes agent responses that preceded friction
+          if (Date.now() - _lastClassifierRun > CLASSIFIER_INTERVAL_MS) {
+            _lastClassifierRun = Date.now();
+            // Use OpenClaw's model API if available, otherwise skip
+            if (typeof api.complete === "function") {
+              runClassification(async (prompt: string) => {
+                const result = await api.complete({
+                  messages: [{ role: "user", content: prompt }],
+                  maxTokens: 2000,
+                });
+                return typeof result === "string" ? result : result?.content || "";
+              })
+                .then((r) => {
+                  if (r.newCandidates > 0 || r.promoted.length > 0) {
+                    logger.info(
+                      `[friction-guard] Classifier: ${r.newCandidates} new candidates, ${r.promoted.length} promoted to ban`
+                    );
+                  }
+                })
+                .catch((e) => logger.warn("[friction-guard] Classifier error:", e));
+            }
           }
 
           return injection.trim() ? { prependSystemContext: injection } : {};

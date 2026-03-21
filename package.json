@@ -1,7 +1,7 @@
 {
   "name": "openclaw-friction-guard",
-  "version": "3.2.0",
-  "description": "Evidence-based interaction friction detection and constraint enforcement for OpenClaw agents. Learns relational mismatch patterns and injects pre-generation constraints to improve agent communication quality. Includes cold-start situation-first protocol for common-sense frame error prevention.",
+  "version": "3.3.0",
+  "description": "Evidence-based interaction friction detection and constraint enforcement for OpenClaw agents. Learns relational mismatch patterns and injects pre-generation constraints to improve agent communication quality.",
   "keywords": [
     "openclaw",
     "plugin",
@@ -11,9 +11,7 @@
     "agent-behavior",
     "constraint-enforcement",
     "mental-health",
-    "conversational-ai",
-    "context-priming",
-    "intent-detection"
+    "conversational-ai"
   ],
   "author": {
     "name": "Naomi Hoogeweij",
