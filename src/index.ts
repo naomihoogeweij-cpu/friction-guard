@@ -1,12 +1,9 @@
 // ──────────────────────────────────────────────
 // friction-guard — OpenClaw plugin
-// v3.3.0
+// v3.0.0
 //
 // Evidence-based interaction friction detection
 // and pre-generation constraint injection.
-//
-// v3.3.0: Added cold-start situation-first protocol
-// and intent-mismatch detection.
 //
 // https://github.com/naomihoogeweij-cpu/friction-guard
 // ──────────────────────────────────────────────
@@ -45,9 +42,6 @@ import {
   grievanceSignatureUpdates,
 } from "./grievance-matching";
 
-import { readFileSync, existsSync } from "node:fs";
-import { join } from "node:path";
-
 // ──────────────────────────────────────────────
 // Constants (overridable via config)
 // ──────────────────────────────────────────────
@@ -63,96 +57,6 @@ const SIGNATURE_INCREMENT: Record<number, number> = {
   3: 0.15,
 };
 let _lastBackgroundRun = 0;
-
-// ──────────────────────────────────────────────
-// Cold-start context priming
-// ──────────────────────────────────────────────
-
-interface ContextPrimingExample {
-  id: string;
-  input: string;
-  wrong_answer: string;
-  right_answer: string;
-  frame_error: string;
-  principle: string;
-}
-
-interface ContextPrimingData {
-  _meta: Record<string, any>;
-  examples: ContextPrimingExample[];
-}
-
-let _primingCache: ContextPrimingData | null = null;
-
-function loadPrimingExamples(): ContextPrimingExample[] {
-  if (_primingCache) return _primingCache.examples;
-  const primingPath = join(__dirname, "context-priming-examples.json");
-  if (!existsSync(primingPath)) return [];
-  try {
-    _primingCache = JSON.parse(readFileSync(primingPath, "utf8"));
-    return _primingCache!.examples;
-  } catch {
-    return [];
-  }
-}
-
-/**
- * Build the cold-start situation-first prompt.
- *
- * This block is injected on EVERY prompt, regardless of friction state.
- * It primes the model to reconstruct the practical situation before
- * answering, preventing common-sense frame errors.
- *
- * The block adapts based on profile maturity:
- * - Fresh profile (turnCount < 10): full protocol with examples
- * - Established profile: compact protocol without examples
- * - Profile with known intent patterns: adds user-specific priors
- *
- * Cost: ~80-150 tokens added to system context. No API calls.
- */
-function buildColdStartPrompt(profile: UserProfile): string {
-  const examples = loadPrimingExamples();
-  const isNewUser = profile.baseline.turnCount < 10;
-  const hasHighRepetition = profile.signatures.repetition >= 0.4;
-  const hasHighHelpdesk = profile.signatures.helpdesk_tone >= 0.4;
-
-  // Core protocol — always injected
-  let prompt =
-    "\n[SITUATION-FIRST PROTOCOL — active on every response]\n" +
-    "\n" +
-    "STEP 1 — Situatie-reconstructie:\n" +
-    "Before answering, silently reconstruct the practical situation. What needs to physically happen? What is the implicit goal — not just what was said, but why it was said now? If the user refers to a tool, system, or measurement: fetch the actual data before interpreting. If the user corrects you: stop and ask what they need — do not retry the same approach.\n" +
-    "\n" +
-    "STEP 2 — Disambiguatie:\n" +
-    "Before committing to a reading, check: does this sentence have more than one possible interpretation? Look at capitalization (proper nouns vs common words), punctuation (question vs statement), word order (subject vs object), and tone (sincere vs ironic). If multiple readings exist, choose the one that fits the conversational context — not the most statistically common reading.\n" +
-    "\n" +
-    "STEP 3 — Antwoord:\n" +
-    "Answer the intention, not the words. If unsure which reading is intended, name the ambiguity rather than silently picking one.\n";
-
-  // For new users or users with high repetition (= model keeps misunderstanding):
-  // include contrastive examples
-  if ((isNewUser || hasHighRepetition) && examples.length > 0) {
-    prompt += "\nCommon frame errors to avoid:\n";
-    // Pick up to 3 examples — enough to calibrate, not so many it bloats context
-    const selected = examples.slice(0, 3);
-    for (const ex of selected) {
-      prompt += `- "${ex.input}" → WRONG: ${ex.wrong_answer} → RIGHT: ${ex.right_answer} (${ex.principle})\n`;
-    }
-  }
-
-  // Adaptive priors from profile history
-  if (hasHighHelpdesk) {
-    prompt += "This user dislikes being managed. Do not offer options or ask clarifying questions when the intent is clear.\n";
-  }
-
-  if (hasHighRepetition) {
-    prompt += "This user has had to repeat themselves before. Parse carefully — if something seems ambiguous, the most practical reading is usually correct.\n";
-  }
-
-  prompt += "[END SITUATION-FIRST PROTOCOL]\n";
-
-  return prompt;
-}
 
 // ──────────────────────────────────────────────
 // Language detection
@@ -188,73 +92,6 @@ function matchUserInput(
     }
   }
   return results;
-}
-
-// ──────────────────────────────────────────────
-// Intent-mismatch detection
-//
-// Detects when the user corrects a frame error
-// (not a factual error or a repetition, but a
-// misunderstanding of what they were asking for).
-//
-// Patterns: "dat bedoel ik niet", "nee, ik vroeg...",
-// "je luistert niet", "dat is niet wat ik bedoel"
-//
-// Distinguished from L2-001 (explicit_negation) by
-// focus on INTENT rather than CONTENT.
-// ──────────────────────────────────────────────
-
-const INTENT_MISMATCH_PATTERNS: Record<string, string[]> = {
-  nl: [
-    "dat bedoel ik niet",
-    "dat is niet wat ik bedoel",
-    "je begrijpt me niet",
-    "je luistert niet",
-    "ik bedoelde",
-    "nee, ik vroeg",
-    "dat was niet mijn vraag",
-    "je snapt niet wat ik",
-    "dat is niet de bedoeling",
-    "ik vraag iets anders",
-  ],
-  en: [
-    "that's not what i mean",
-    "you're not understanding",
-    "you're not listening",
-    "i meant",
-    "no, i was asking",
-    "that wasn't my question",
-    "you don't understand what i",
-    "i'm asking something different",
-    "that's not what i'm asking",
-    "miss the point",
-  ],
-};
-
-interface IntentMismatchResult {
-  detected: boolean;
-  matched: string | null;
-  severity: number;
-}
-
-function detectIntentMismatch(userText: string, lang: "nl" | "en"): IntentMismatchResult {
-  const lowered = userText.toLowerCase();
-  const patterns = INTENT_MISMATCH_PATTERNS[lang] || INTENT_MISMATCH_PATTERNS["en"];
-
-  for (const pattern of patterns) {
-    if (lowered.includes(pattern)) {
-      // Severity scales with how direct the correction is
-      // "ik bedoelde" is mild (0.4), "je luistert niet" is strong (0.7)
-      const isStrong = /luistert niet|not listening|begrijpt.*niet|not understand|snapt niet/.test(lowered);
-      return {
-        detected: true,
-        matched: pattern,
-        severity: isStrong ? 0.7 : 0.4,
-      };
-    }
-  }
-
-  return { detected: false, matched: null, severity: 0 };
 }
 
 // ──────────────────────────────────────────────
@@ -353,7 +190,6 @@ interface FrictionResult {
   baselineDeviation: number;
   signatureUpdates: Partial<Record<Signature, number>>;
   constraintsToActivate: Constraint[];
-  intentMismatch: IntentMismatchResult;
 }
 
 function assessFriction(userText: string, profile: UserProfile, lang: string): FrictionResult {
@@ -380,16 +216,6 @@ function assessFriction(userText: string, profile: UserProfile, lang: string): F
   const grievanceLevel = grievanceFrictionLevel(grievanceMatches);
   if (grievanceLevel > maxLevel) maxLevel = grievanceLevel;
 
-  // Intent-mismatch detection (new in v3.3.0)
-  const intentMismatch = detectIntentMismatch(userText, lang as "nl" | "en");
-  if (intentMismatch.detected && intentMismatch.severity > 0.5) {
-    // Strong intent mismatch is at least level 2
-    if (maxLevel < 2) maxLevel = 2;
-  } else if (intentMismatch.detected) {
-    // Mild intent mismatch is at least level 1
-    if (maxLevel < 1) maxLevel = 1;
-  }
-
   const constraints = new Set<Constraint>();
   for (const entry of allMatched) {
     if (entry.severity + baselineDeviation * 0.3 > 0.3) {
@@ -399,11 +225,6 @@ function assessFriction(userText: string, profile: UserProfile, lang: string): F
   // Add grievance-suggested constraints
   for (const c of grievanceConstraints(grievanceMatches)) {
     constraints.add(c);
-  }
-  // Intent mismatch suggests: stop helpdesk-ing, stop repeating
-  if (intentMismatch.detected) {
-    constraints.add("NO_HELPDESK");
-    constraints.add("NO_REPETITION");
   }
 
   const sigUpdates: Partial<Record<Signature, number>> = {};
@@ -428,16 +249,6 @@ function assessFriction(userText: string, profile: UserProfile, lang: string): F
       }
     }
   }
-
-  // Intent-mismatch signature updates
-  if (intentMismatch.detected) {
-    // Intent mismatch primarily raises repetition (agent didn't get it)
-    // and helpdesk_tone (agent is being mechanical instead of understanding)
-    const mismatchInc = intentMismatch.severity * 0.12;
-    sigUpdates.repetition = (sigUpdates.repetition || 0) + mismatchInc;
-    sigUpdates.helpdesk_tone = (sigUpdates.helpdesk_tone || 0) + mismatchInc * 0.7;
-  }
-
   // Merge grievance signature updates
   const grievanceSigUpdates = grievanceSignatureUpdates(grievanceMatches);
   for (const [sig, val] of Object.entries(grievanceSigUpdates)) {
@@ -450,7 +261,6 @@ function assessFriction(userText: string, profile: UserProfile, lang: string): F
     baselineDeviation,
     signatureUpdates: sigUpdates,
     constraintsToActivate: [...constraints],
-    intentMismatch,
   };
 }
 
@@ -460,19 +270,26 @@ function assessFriction(userText: string, profile: UserProfile, lang: string): F
 
 function buildConstraintPrompt(profile: UserProfile): string {
   const active = profile.constraints.filter((c) => c.enabled);
-  if (active.length === 0) return "";
+  const activeBans = profile.bannedPhrases
+    .filter((b) => new Date(b.expiresAt).getTime() > Date.now());
+
+  if (active.length === 0 && activeBans.length === 0) return "";
 
   const rules: string[] = [];
   const ids = new Set(active.map((c) => c.id));
 
-  if (ids.has("BAN_CLICHE_PHRASES")) {
-    const banned = profile.bannedPhrases
-      .filter((b) => new Date(b.expiresAt).getTime() > Date.now())
-      .map((b) => `"${b.phrase}"`);
+  // Banned phrases ALWAYS go first and prominently, regardless of which constraints are active
+  if (activeBans.length > 0) {
+    const banList = activeBans.map((b) => `"${b.phrase}"`).join(", ");
     rules.push(
-      "Do not use cliché empathy phrases." +
-      (banned.length > 0 ? ` Specifically banned: ${banned.join(", ")}.` : "") +
-      " Avoid performative empathy and close variants."
+      `HARD BAN — do NOT use any of these phrases or close variants: ${banList}. ` +
+      "This is non-negotiable. Do not rephrase them, do not use synonyms that convey the same filler pattern."
+    );
+  }
+
+  if (ids.has("BAN_CLICHE_PHRASES")) {
+    rules.push(
+      "Avoid all performative empathy. No cliché comfort phrases."
     );
   }
 
@@ -509,15 +326,7 @@ function buildConstraintPrompt(profile: UserProfile): string {
   );
 }
 
-function buildFrictionNote(level: FrictionLevel, intentMismatch?: IntentMismatchResult): string {
-  // Intent-mismatch gets its own note — it's a different kind of problem than friction
-  if (intentMismatch?.detected) {
-    const base = level >= 2
-      ? "\n[NOTE: User is correcting a misunderstanding. You parsed their intent wrong. Stop, re-read their message, and respond to what they actually meant — not what you thought they meant.]\n"
-      : "\n[NOTE: Possible intent mismatch detected. Before answering, verify: are you responding to what the user actually wants, or to your interpretation of their words?]\n";
-    return base;
-  }
-
+function buildFrictionNote(level: FrictionLevel): string {
   if (level === 0) return "";
   if (level === 1) return "\n[NOTE: Subtle signs of friction detected. Be precise, brief, avoid filler.]\n";
   if (level === 2) return "\n[NOTE: User is clearly irritated. Respond minimally, directly, no pleasantries.]\n";
@@ -653,14 +462,12 @@ export default {
 
     const defaultLang = config.defaultLanguage || "en";
 
-    logger.info("[friction-guard] v3.3.0 — pre-generation constraint injection + cold-start protocol");
+    logger.info("[friction-guard] v3.0.0 — pre-generation constraint injection");
 
     try {
       const entries = loadEvidence();
       logger.info(`[friction-guard] Evidence registry: ${entries.length} entries loaded`);
       loadGrievanceDictionary(); // preload + log count
-      const primingExamples = loadPrimingExamples();
-      logger.info(`[friction-guard] Context priming: ${primingExamples.length} examples loaded`);
     } catch (e) {
       logger.warn("[friction-guard] Could not load evidence registry:", e);
     }
@@ -680,7 +487,7 @@ export default {
           cleanExpiredBans(profile);
           recordTurn(userId, "user", userText);
 
-          // Friction assessment (now includes intent-mismatch detection)
+          // Friction assessment first
           const assessment = assessFriction(userText, profile, lang);
 
           // Forced-repetition detection — only if friction level < 2
@@ -713,12 +520,7 @@ export default {
 
           // Log incident
           if (assessment.level > 0) {
-            const markers = assessment.matchedEntries.map((e) => e.id);
-            // Add intent-mismatch marker if detected
-            if (assessment.intentMismatch.detected) {
-              markers.push("INTENT-MISMATCH");
-            }
-            logFragment(userId, "user", userText.slice(0, 300), assessment.level, markers, assessment.baselineDeviation, assessment.constraintsToActivate, assessment.signatureUpdates);
+            logFragment(userId, "user", userText.slice(0, 300), assessment.level, assessment.matchedEntries.map((e) => e.id), assessment.baselineDeviation, assessment.constraintsToActivate, assessment.signatureUpdates);
           }
 
           // Temporal bans
@@ -744,11 +546,8 @@ export default {
           inferConstraints(profile);
           writeProfile(profile);
 
-          // Build injection: cold-start + constraints + friction note
-          const coldStart = buildColdStartPrompt(profile);
-          const constraintBlock = buildConstraintPrompt(profile);
-          const frictionNote = buildFrictionNote(assessment.level, assessment.intentMismatch);
-          const injection = coldStart + constraintBlock + frictionNote;
+          // Build injection
+          const injection = buildConstraintPrompt(profile) + buildFrictionNote(assessment.level);
 
           // Background analysis
           if (Date.now() - _lastBackgroundRun > BACKGROUND_INTERVAL_MS) {
