@@ -19,6 +19,16 @@
 - Daily execution cycle via OpenClaw's model API (when available)
 - Promoted bans merged into constraint prompt alongside static bans
 
+### Retroactive pattern mining (Option 1)
+- New `agent-pattern-miner.ts`: statistical n-gram analysis of agent output preceding friction vs calm interactions
+- Extracts bigrams, trigrams, and 4-grams from agent responses
+- Compares friction rate per n-gram against baseline friction rate
+- Promotion criteria: ≥5 observations, ≥60% friction rate, ≥2x lift over baseline
+- Stop-word filtering (NL + EN) to ignore function-word n-grams
+- Runs every 15 minutes alongside background analysis
+- Mined patterns merged into dynamic ban list alongside LLM-classifier promoted bans
+- 30-day decay for low-count n-grams
+
 ## 3.2.0 (2026-03-10)
 
 ### Banned phrase enforcement

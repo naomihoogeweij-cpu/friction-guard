@@ -52,6 +52,10 @@ import {
   runClassification,
   getClassifierStats,
 } from "./agent-irritation-classifier";
+import {
+  runPatternMining,
+  getMinedPatterns,
+} from "./agent-pattern-miner";
 
 // ──────────────────────────────────────────────
 // Constants (overridable via config)
@@ -286,11 +290,14 @@ function buildConstraintPrompt(profile: UserProfile): string {
   const activeBans = profile.bannedPhrases
     .filter((b) => new Date(b.expiresAt).getTime() > Date.now());
 
-  // Merge in dynamically promoted bans from the LLM classifier
+  // Merge in dynamically promoted bans from LLM classifier + pattern miner
   const promoted = getPromotedBans();
+  const mined = getMinedPatterns();
+  const existingPhrases = new Set(activeBans.map((b) => b.phrase));
   const allBanPhrases = [
     ...activeBans.map((b) => b.phrase),
-    ...promoted.filter((p) => !activeBans.some((b) => b.phrase === p)),
+    ...promoted.filter((p) => !existingPhrases.has(p)),
+    ...mined.filter((p) => !existingPhrases.has(p) && !promoted.includes(p)),
   ];
 
   if (active.length === 0 && allBanPhrases.length === 0) return "";
@@ -574,6 +581,13 @@ export default {
           if (Date.now() - _lastBackgroundRun > BACKGROUND_INTERVAL_MS) {
             _lastBackgroundRun = Date.now();
             try { runBackgroundAnalysis(userId); } catch (e) { logger.warn("[friction-guard] Background analysis error:", e); }
+            // Pattern miner — runs alongside background analysis
+            try {
+              const mineResult = runPatternMining();
+              if (mineResult.promoted.length > 0) {
+                logger.info(`[friction-guard] Pattern miner: ${mineResult.promoted.length} new patterns promoted`);
+              }
+            } catch (e) { logger.warn("[friction-guard] Pattern miner error:", e); }
           }
 
           // Daily classifier run — analyzes agent responses that preceded friction
