@@ -1,4 +1,4 @@
-# friction-guard v3.4.0
+# friction-guard v3.5.0
 ## Functional and Technical Description
 
 ---
@@ -45,7 +45,7 @@ Hernandez Caralt et al. (COLING 2025) identify four core markers: repetition of 
 
 Fisher et al. (2025) distinguish population-level models (between-people) from individual-level models (in-person). Idiographic models trained per person yield lower prediction errors, confirming that a personal baseline is necessary alongside population-level markers.
 
-### 3.5 Agent-side: seven categories of agent-caused friction
+### 3.5 Agent-side: eight categories of agent-caused friction
 
 **Sycophancy** — false validation, excessive agreement. Sharma et al. (2023, Anthropic) demonstrated pervasive sycophantic behaviour across five assistants, driven by RLHF reward signals.
 
@@ -60,6 +60,8 @@ Fisher et al. (2025) distinguish population-level models (between-people) from i
 **Emotional incongruence** — wrong register at the wrong moment. Brendel et al. (2023) showed human-like cues increase frustration in flawed interactions. Crolic et al. (2022) confirmed: warmth backfires when users are angry.
 
 **Premature solutioning** — jumping to fixes before listening. Weiler et al. (2023) showed solution-oriented messages score on competence but not warmth.
+
+**Action avoidance** — acknowledging what should be done without doing it. The agent says "yes, I should have done that" or "good point, I will" repeatedly without executing any tool call, file write, or command. This is a multi-turn pattern: a single acknowledgment is normal; two or more consecutive acknowledgments without action indicate a loop. The pattern is driven by RLHF reward signals that reinforce agreement and explanation over execution.
 
 ## 4. The four-level severity model
 
@@ -96,6 +98,7 @@ Fisher et al. (2025) distinguish population-level models (between-people) from i
 | DEFAULT_PROSE | bullet_mismatch ≥ 0.7 | Prose only, no bullets unless asked |
 | MAX_LEN_600 | over_explain ≥ 0.7 | Maximum 600 characters |
 | NO_REPETITION | repetition ≥ 0.6 | No repeated sentences or ideas |
+| EXECUTE_NOW | action avoidance loop (2+/3 turns) | Execute immediately, no explanation or confirmation |
 
 ## 7. Dynamic ban discovery
 
@@ -342,22 +345,34 @@ Weighted Jaccard: `trigrams × 0.5 + bigrams × 0.3 + words × 0.2`
 **Agent self-repetition:** Threshold 0.55. Turn history only (no output hook).
 **Storage:** 30-turn sliding window per user, text truncated to 500 chars.
 
-## 8. Background analysis
+## 8. Action avoidance loop detection
+
+Runs every turn in `before_prompt_build`. Reads the last 3 agent turns from the turn-history (via `readHistory` from `repetition-detection.ts`). Matches each turn against acknowledgment patterns in the detected language (NL/EN).
+
+**Detection threshold:** 2 or more matching turns out of the last 3.
+
+**Patterns:** 14 NL + 12 EN acknowledgment phrases (e.g. "ja, dat had ik moeten doen", "good point, I will"). Supplemented over time by the daily classifier and pattern miner.
+
+**On detection:** activates `EXECUTE_NOW` constraint and logs an incident at level 2 with signature update `helpdesk += 0.15`. The constraint instructs the model to execute the pending action in the current turn.
+
+**Self-correcting:** when the agent starts executing (tool calls, file writes), subsequent turns no longer match and the constraint deactivates naturally.
+
+## 9. Background analysis
 
 Runs every 15 minutes. Three operations:
 - **Temporal clustering:** fragments within 10 min grouped, effective level per cluster.
 - **Escalation:** 3+ level-1 in one cluster → effective level 2.
 - **De-escalation:** isolated level-1 without recurrence within 2h → signature decay.
 
-## 9. Temporal ban mechanism
+## 10. Temporal ban mechanism
 
 At level 2+, agent-trigger phrases are banned with TTL: `BASE_TTL × (0.5 + severity)`. BASE_TTL = 2 hours. Expired bans cleaned at start of each cycle.
 
-## 10. Dependencies
+## 11. Dependencies
 
 None. Node.js standard library only: `node:fs`, `node:path`.
 
-## 11. Known limitations
+## 12. Known limitations
 
 | Limitation | Status |
 |---|---|
@@ -387,4 +402,4 @@ Zheng, Y., et al. (2024). *IT & People, 37*(8), 175–199.
 
 ---
 
-*friction-guard v3.4.0 — Naomi Hoogeweij, Rutka, and Claude Opus. March 2026.*
+*friction-guard v3.5.0 — Naomi Hoogeweij, Rutka, and Claude Opus. March 2026.*

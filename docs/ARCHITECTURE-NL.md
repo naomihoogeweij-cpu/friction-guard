@@ -1,4 +1,4 @@
-# friction-guard v3.4.0
+# friction-guard v3.5.0
 ## Functionele en technische beschrijving
 
 ---
@@ -45,7 +45,7 @@ Hernandez Caralt et al. (COLING 2025) identificeren vier kernmarkers: herhaling 
 
 Fisher et al. (2025) maken onderscheid tussen modellen op populatieniveau (between-people) en op individueel niveau (in-person). Idiografische modellen getraind per persoon leveren lagere voorspelfouten, wat bevestigt dat een persoonlijke baseline noodzakelijk is naast markers op populatieniveau.
 
-### 3.5 Agentkant: zeven categorieën van agentgeroepen frictie
+### 3.5 Agentkant: acht categorieën van agentgeroepen frictie
 
 **Sycophancy** — valse bevestiging, overmatig instemmen. Sharma et al. (2023, Anthropic) toonden pervasief sycofantisch gedrag aan bij vijf assistenten, gedreven door RLHF-beloningssignalen.
 
@@ -60,6 +60,8 @@ Fisher et al. (2025) maken onderscheid tussen modellen op populatieniveau (betwe
 **Emotionele incongruentie** — het verkeerde register op het verkeerde moment. Brendel et al. (2023) toonden aan dat mensachtige signalen frustratie versterken bij foutieve interacties. Crolic et al. (2022) bevestigden: warmte werkt averechts bij boze gebruikers.
 
 **Premature oplossing** — springen naar fixes vóór luisteren. Weiler et al. (2023) lieten zien dat oplossingsgerichte berichten scoren op competentie maar niet op warmte.
+
+**Actievermijding** — erkennen wat gedaan moet worden zonder het te doen. De agent zegt herhaaldelijk "ja, dat had ik moeten doen" of "klopt, ik ga dat nu doen" zonder daadwerkelijk een tool aan te roepen, een bestand te schrijven of een commando uit te voeren. Dit is een meerbeurts-patroon: een enkele erkenning is normaal; twee of meer opeenvolgende erkenningen zonder actie wijzen op een loop. Het patroon wordt gedreven door RLHF-beloningssignalen die instemming en uitleg belonen boven uitvoering.
 
 ## 4. Het vierniveau-ernstmodel
 
@@ -96,6 +98,7 @@ Fisher et al. (2025) maken onderscheid tussen modellen op populatieniveau (betwe
 | DEFAULT_PROSE | bullet_mismatch ≥ 0.7 | Alleen proza, geen opsommingen tenzij gevraagd |
 | MAX_LEN_600 | over_explain ≥ 0.7 | Maximaal 600 tekens |
 | NO_REPETITION | repetition ≥ 0.6 | Geen herhaalde zinnen of ideeën |
+| EXECUTE_NOW | actievermijdingsloop (2+/3 beurten) | Voer onmiddellijk uit, geen uitleg of bevestiging |
 
 ## 7. Dynamische ban-ontdekking
 
@@ -342,22 +345,34 @@ Gewogen Jaccard: `trigrammen × 0,5 + bigrammen × 0,3 + woorden × 0,2`
 **Agent zelf-herhaling:** Drempel 0,55. Alleen turngeschiedenis (geen output-hook).
 **Opslag:** 30-turns schuifvenster per gebruiker, tekst afgekapt op 500 tekens.
 
-## 8. Achtergrondanalyse
+## 8. Actievermijdingsloopdetectie
+
+Draait elke beurt in `before_prompt_build`. Leest de laatste 3 agentbeurten uit de beurtgeschiedenis (via `readHistory` uit `repetition-detection.ts`). Matcht elke beurt tegen erkenningspatronen in de gedetecteerde taal (NL/EN).
+
+**Detectiedrempel:** 2 of meer matchende beurten van de laatste 3.
+
+**Patronen:** 14 NL + 12 EN erkenningsfrasen (bijv. "ja, dat had ik moeten doen", "good point, I will"). Worden in de loop der tijd aangevuld door de dagelijkse classifier en patroonminer.
+
+**Bij detectie:** activeert de `EXECUTE_NOW`-constraint en logt een incident op niveau 2 met signature-update `helpdesk += 0.15`. De constraint instrueert het model om de openstaande actie in de huidige beurt uit te voeren.
+
+**Zelfcorrigerend:** zodra de agent acties gaat uitvoeren (tool calls, bestandsschrijfacties), matchen volgende beurten niet meer en deactiveert de constraint vanzelf.
+
+## 9. Achtergrondanalyse
 
 Draait elke 15 minuten. Drie operaties:
 - **Temporele clustering:** fragmenten binnen 10 min gegroepeerd, effectief niveau per cluster.
 - **Escalatie:** 3+ niveau-1 in één cluster → effectief niveau 2.
 - **De-escalatie:** geïsoleerd niveau-1 zonder herhaling binnen 2u → signature-verval.
 
-## 9. Temporeel ban-mechanisme
+## 10. Temporeel ban-mechanisme
 
 Bij niveau 2+ worden agent-trigger zinnen gebanned met TTL: `BASE_TTL × (0,5 + severity)`. BASE_TTL = 2 uur. Verlopen bans worden opgeruimd aan het begin van elke cyclus.
 
-## 10. Afhankelijkheden
+## 11. Afhankelijkheden
 
 Geen. Alleen Node.js standaardbibliotheek: `node:fs`, `node:path`.
 
-## 11. Bekende beperkingen
+## 12. Bekende beperkingen
 
 | Beperking | Status |
 |---|---|
@@ -387,4 +402,4 @@ Zheng, Y., et al. (2024). *IT & People, 37*(8), 175–199.
 
 ---
 
-*friction-guard v3.4.0 — Naomi Hoogeweij, Rutka en Claude Opus. Maart 2026.*
+*friction-guard v3.5.0 — Naomi Hoogeweij, Rutka en Claude Opus. Maart 2026.*
