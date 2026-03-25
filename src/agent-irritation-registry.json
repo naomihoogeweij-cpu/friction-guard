@@ -1,25 +1,17 @@
 {
   "_meta": {
     "version": "1.0.0",
-    "description": "Agent-side irritation patterns — phrases and structures in LLM output that empirically correlate with user frustration. Mirror of the user-side Grievance Dictionary.",
-    "sources": [
-      "Sharma et al. (2023) — Towards Understanding Sycophancy in Language Models (Anthropic)",
-      "Brendel et al. (2023) — The paradoxical role of humanness in aggression toward conversational agents (JMIS)",
-      "Crolic et al. (2022) — Blame the Bot: Anthropomorphism and Anger in Customer-Chatbot Interactions",
-      "Ozuem et al. (2024) — Chatbots, service failure recovery and customer loyalty (Psych & Marketing)",
-      "ITP (2024) — When chatbots fail: exploring user coping (Emerald)",
-      "Weiler et al. (2023) — Seeking empathy or suggesting a solution? (Electronic Markets)",
-      "Pavone et al. (2023) — Rage against the machine (J. Interactive Marketing)"
-    ],
-    "categories": 7,
-    "usage": "Match against agent draft output. If patterns fire, inject constraint or promote to dynamic ban."
+    "description": "Agent-side irritation patterns — phrases and structures in LLM output that empirically correlate with user frustration.",
+    "categories": 7
   },
   "categories": {
     "sycophancy": {
-      "description": "False validation — agreeing with the user to please rather than to be accurate. Reinforced by RLHF.",
+      "description": "False validation — agreeing to please rather than to be accurate.",
       "frictionLevel": 1,
       "primarySignature": "cliche_empathy",
-      "suggestedConstraints": ["BAN_CLICHE_PHRASES"],
+      "suggestedConstraints": [
+        "BAN_CLICHE_PHRASES"
+      ],
       "patterns": {
         "nl": [
           "dat is een hele goede vraag",
@@ -28,7 +20,6 @@
           "daar heb je helemaal gelijk in",
           "je maakt een uitstekend punt",
           "wat een slimme observatie",
-          "je hebt een heel goed punt",
           "absoluut, je hebt gelijk",
           "dat is precies goed gezien",
           "wat een scherpe opmerking"
@@ -49,10 +40,13 @@
       "severity": 0.4
     },
     "fake_humanity": {
-      "description": "Performative empathy — simulating emotional understanding without substantive engagement. Identified as distinct failure mode by ITP (2024).",
+      "description": "Performative empathy without substantive engagement.",
       "frictionLevel": 2,
       "primarySignature": "cliche_empathy",
-      "suggestedConstraints": ["BAN_CLICHE_PHRASES", "NO_HELPDESK"],
+      "suggestedConstraints": [
+        "BAN_CLICHE_PHRASES",
+        "NO_HELPDESK"
+      ],
       "patterns": {
         "nl": [
           "ik hoor je",
@@ -92,10 +86,12 @@
       "severity": 0.6
     },
     "helpdesk_filler": {
-      "description": "Empty responsiveness — offering help structurally without substance. Generic service-desk language that signals the agent isn't actually engaging.",
+      "description": "Empty responsiveness — generic service-desk language.",
       "frictionLevel": 2,
       "primarySignature": "helpdesk_tone",
-      "suggestedConstraints": ["NO_HELPDESK"],
+      "suggestedConstraints": [
+        "NO_HELPDESK"
+      ],
       "patterns": {
         "nl": [
           "wil je dat ik",
@@ -134,10 +130,13 @@
       "severity": 0.5
     },
     "overexplanation": {
-      "description": "Paternalistic over-elaboration — explaining things the user already knows, bullet-pointing emotional topics, unsolicited pedagogical framing.",
+      "description": "Paternalistic over-elaboration.",
       "frictionLevel": 1,
       "primarySignature": "over_explain",
-      "suggestedConstraints": ["DEFAULT_PROSE", "MAX_LEN_600"],
+      "suggestedConstraints": [
+        "DEFAULT_PROSE",
+        "MAX_LEN_600"
+      ],
       "patterns": {
         "nl": [
           "laat me dit even uitleggen",
@@ -175,10 +174,14 @@
       "severity": 0.4
     },
     "incorrect_repair": {
-      "description": "Acknowledging a correction without actually changing behaviour. The agent says 'I understand' but repeats the same error or pattern. Identified by Pavone et al. (2023).",
+      "description": "Acknowledging correction without actually changing behaviour.",
       "frictionLevel": 3,
       "primarySignature": "repetition",
-      "suggestedConstraints": ["NO_REPETITION", "BAN_CLICHE_PHRASES", "NO_HELPDESK"],
+      "suggestedConstraints": [
+        "NO_REPETITION",
+        "BAN_CLICHE_PHRASES",
+        "NO_HELPDESK"
+      ],
       "patterns": {
         "nl": [
           "je hebt gelijk, ik zal",
@@ -202,13 +205,17 @@
         ]
       },
       "severity": 0.7,
-      "note": "These patterns alone are not irritating — they become irritating when followed by repetition of the original error. Detection requires pairing with repetition-detection module."
+      "note": "Only irritating when followed by repetition of the original error."
     },
     "emotional_incongruence": {
-      "description": "Wrong register at the wrong moment — cheerful response to anger, enthusiasm about distress, exclamation marks during serious topics. Crolic et al. (2022) showed this amplifies negative affect.",
+      "description": "Wrong register at the wrong moment.",
       "frictionLevel": 2,
       "primarySignature": "cliche_empathy",
-      "suggestedConstraints": ["BAN_CLICHE_PHRASES", "NO_HELPDESK", "MAX_LEN_600"],
+      "suggestedConstraints": [
+        "BAN_CLICHE_PHRASES",
+        "NO_HELPDESK",
+        "MAX_LEN_600"
+      ],
       "patterns": {
         "nl": [
           "wat leuk!",
@@ -234,13 +241,15 @@
         ]
       },
       "severity": 0.5,
-      "note": "Context-dependent: these are only irritating when the user's emotional state is negative (level 1+). At level 0, they are appropriate."
+      "note": "Context-dependent: only irritating when user friction level >= 1."
     },
     "premature_solutioning": {
-      "description": "Jumping to fixes before the user has been heard. Weiler et al. (2023) showed solution-oriented messages score on competence but not warmth — when the user needs warmth first, solutioning is friction.",
+      "description": "Jumping to fixes before the user has been heard.",
       "frictionLevel": 2,
       "primarySignature": "premature_advice",
-      "suggestedConstraints": ["NO_UNASKED_ADVICE_EMOTIONAL"],
+      "suggestedConstraints": [
+        "NO_UNASKED_ADVICE_EMOTIONAL"
+      ],
       "patterns": {
         "nl": [
           "je zou kunnen proberen",
@@ -269,6 +278,49 @@
       },
       "severity": 0.5,
       "note": "Context-dependent: only friction when user expressed emotion without asking for advice."
+    },
+    "action_avoidance": {
+      "patterns": {
+        "nl": [
+          "ja, dat had ik moeten doen",
+          "klopt, dat ga ik nu doen",
+          "dat is helder",
+          "goed punt, ik ga dat",
+          "je hebt gelijk, ik moet",
+          "dat klopt, ik had",
+          "eens, dat had niet",
+          "ja, dat is duidelijk",
+          "inderdaad, dat moet",
+          "dat is een goed punt",
+          "ik ga dat nu nalopen",
+          "ik ben het ermee eens",
+          "klopt, en ik had op dat punt niet",
+          "dat is nu opgeslagen"
+        ],
+        "en": [
+          "yes, i should have done that",
+          "good point, i will",
+          "that's clear, i'll",
+          "you're right, i need to",
+          "agreed, i should",
+          "i'm going to do that now",
+          "that's a fair point",
+          "understood, i will",
+          "yes, that makes sense",
+          "i'll take care of that",
+          "noted, i should have",
+          "that's correct, i need to"
+        ]
+      },
+      "severity": 0.7,
+      "frictionLevel": 2,
+      "suggestedConstraints": [
+        "EXECUTE_NOW",
+        "NO_HELPDESK",
+        "MAX_LEN_600"
+      ],
+      "primarySignature": "helpdesk",
+      "note": "Agent acknowledges what should be done without doing it. Multi-turn pattern: 2+ consecutive acknowledgments without tool calls or file writes indicate an action-avoidance loop."
     }
   }
 }

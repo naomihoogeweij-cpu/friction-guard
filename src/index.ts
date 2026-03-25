@@ -1,6 +1,6 @@
 // ──────────────────────────────────────────────
 // friction-guard — OpenClaw plugin
-// v3.0.0
+// v3.4.0
 //
 // Evidence-based interaction friction detection
 // and pre-generation constraint injection.
@@ -25,42 +25,114 @@ import {
   type Constraint,
   type Signature,
   type FrictionGuardConfig,
-} from "./friction-policy";
+} from "../../workspace/interaction/friction-policy";
 
-import { logFragment } from "./incident-log";
+import { logFragment } from "../../workspace/interaction/incident-log";
 import {
   detectUserForcedRepetition,
   findRepeatedAgentPhrases,
   recordTurn,
-} from "./repetition-detection";
-import { runBackgroundAnalysis } from "./background-analysis";
+  readHistory,
+} from "../../workspace/interaction/repetition-detection";
+import { runBackgroundAnalysis } from "../../workspace/interaction/background-analysis";
 import {
   loadGrievanceDictionary,
   matchGrievance,
   grievanceFrictionLevel,
   grievanceConstraints,
   grievanceSignatureUpdates,
-} from "./grievance-matching";
+} from "../../workspace/interaction/grievance-matching";
 import {
   loadAgentIrritationRegistry,
   matchAgentIrritation,
   agentIrritationConstraints,
   agentIrritationBanPhrases,
-} from "./agent-irritation-matching";
+} from "../../workspace/interaction/agent-irritation-matching";
 import {
   getPromotedBans,
   runClassification,
   getClassifierStats,
-} from "./agent-irritation-classifier";
+} from "../../workspace/interaction/agent-irritation-classifier";
 import {
   runPatternMining,
   getMinedPatterns,
-} from "./agent-pattern-miner";
+} from "../../workspace/interaction/agent-pattern-miner";
 import {
   loadPrimingExamples,
   buildColdStartPrompt,
   isColdStart,
-} from "./cold-start-priming";
+} from "../../workspace/interaction/cold-start-priming";
+
+import { appendFileSync, mkdirSync } from "node:fs";
+import { join, dirname } from "node:path";
+
+// --- Action avoidance detection ---
+const ACTION_AVOIDANCE_PATTERNS_NL = [
+  "ja, dat had ik moeten doen",
+  "klopt, dat ga ik nu",
+  "dat is helder",
+  "goed punt, ik ga",
+  "je hebt gelijk, ik moet",
+  "ik ga dat nu nalopen",
+  "eens, dat had niet",
+  "inderdaad, dat moet",
+  "dat is nu opgeslagen",
+  "dat klopt, en ik had",
+];
+const ACTION_AVOIDANCE_PATTERNS_EN = [
+  "yes, i should have done that",
+  "good point, i will",
+  "you're right, i need to",
+  "i'm going to do that now",
+  "understood, i will",
+  "noted, i should have",
+];
+
+function detectActionAvoidanceLoop(userId: string, lang: "nl" | "en"): boolean {
+  try {
+    const history = readHistory(userId);
+    if (!history || !history.turns) return false;
+    
+    // Get last 4 agent turns
+    const agentTurns = history.turns
+      .filter(t => t.source === "agent")
+      .slice(-4);
+    
+    if (agentTurns.length < 2) return false;
+    
+    const patterns = lang === "nl" ? ACTION_AVOIDANCE_PATTERNS_NL : ACTION_AVOIDANCE_PATTERNS_EN;
+    
+    let matches = 0;
+    for (const turn of agentTurns.slice(-3)) {
+      const lowered = turn.text.toLowerCase();
+      if (patterns.some(p => lowered.includes(p))) {
+        matches++;
+      }
+    }
+    
+    // 2+ acknowledgment-style turns in last 3 = loop detected
+    return matches >= 2;
+  } catch {
+    return false;
+  }
+}
+
+// --- Central error logging ---
+const ERROR_LOG_PATH = join(process.env.HOME || "/root", ".openclaw", "workspace", "memory", "error-log.jsonl");
+
+function logErrorToFile(category: string, summary: string) {
+  const entry = JSON.stringify({
+    ts: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
+    category,
+    summary: String(summary).slice(0, 300),
+    escalated: false,
+    source: "friction-guard",
+  });
+  try {
+    mkdirSync(dirname(ERROR_LOG_PATH), { recursive: true });
+    appendFileSync(ERROR_LOG_PATH, entry + "\n");
+  } catch (_) {}
+}
 
 // ──────────────────────────────────────────────
 // Constants (overridable via config)
@@ -351,6 +423,15 @@ function buildConstraintPrompt(profile: UserProfile): string {
     rules.push("Do not repeat sentences, phrases, or ideas from previous messages.");
   }
 
+  if (ids.has("EXECUTE_NOW")) {
+    rules.push(
+      "ACTION AVOIDANCE DETECTED. You are acknowledging tasks without executing them. " +
+      "Do NOT explain what you should do. Do NOT confirm you understand. " +
+      "EXECUTE the action in this turn and report what you did. " +
+      "If the action requires a tool call, file write, or command: do it NOW, not next turn."
+    );
+  }
+
   return (
     "\n\n[INTERACTION CONSTRAINTS — learned from this user's preferences]\n" +
     rules.map((r, i) => `${i + 1}. ${r}`).join("\n") +
@@ -387,6 +468,8 @@ function buildFrictionNote(level: FrictionLevel): string {
  */
 function stripChannelMetadata(text: string): string {
   // Remove metadata sections: header line + fenced JSON block
+  // Remove <relevant-memories> blocks injected by OpenClaw memory system
+  text = text.replace(/<relevant-memories>[\s\S]*?<\/relevant-memories>/gi, "");
   let cleaned = text.replace(
     /(?:Conversation info|Sender|Message context|Channel metadata)\s*\(untrusted metadata\)\s*:\s*```json?\s*\{[\s\S]*?\}\s*```/gi,
     ""
@@ -504,6 +587,7 @@ export default {
       loadPrimingExamples(); // preload cold-start contrastive examples
     } catch (e) {
       logger.warn("[friction-guard] Could not load evidence registry:", e);
+      logErrorToFile("tool_fail", "[friction-guard] evidence registry load failed: " + String(e));
     }
 
     api.on(
@@ -534,6 +618,19 @@ export default {
               profile.signatures.repetition = clamp01(profile.signatures.repetition + 0.10);
               logFragment(userId, "user", userText.slice(0, 300), 2 as FrictionLevel, ["USER-FORCED-REPEAT"], 0, ["NO_REPETITION"], { repetition: 0.10 });
             }
+          }
+
+          // Action avoidance loop detection
+          // If the agent has been acknowledging without acting, inject EXECUTE_NOW
+          if (detectActionAvoidanceLoop(userId, lang)) {
+            const execConstraint = profile.constraints.find((c) => c.id === "EXECUTE_NOW");
+            if (execConstraint) {
+              execConstraint.enabled = true;
+              execConstraint.lastTriggered = new Date().toISOString();
+            } else {
+              profile.constraints.push({ id: "EXECUTE_NOW", enabled: true, confidence: 0.9, lastTriggered: new Date().toISOString() });
+            }
+            logFragment(userId, "agent", "[action-avoidance-loop]", 2 as FrictionLevel, ["ACTION-AVOIDANCE"], 0, ["EXECUTE_NOW"], { helpdesk: 0.15 });
           }
 
           // Apply signature updates
@@ -587,7 +684,7 @@ export default {
           // Background analysis
           if (Date.now() - _lastBackgroundRun > BACKGROUND_INTERVAL_MS) {
             _lastBackgroundRun = Date.now();
-            try { runBackgroundAnalysis(userId); } catch (e) { logger.warn("[friction-guard] Background analysis error:", e); }
+            try { runBackgroundAnalysis(userId); } catch (e) { logger.warn("[friction-guard] Background analysis error:", e); logErrorToFile("tool_fail", "[friction-guard] background analysis failed: " + String(e)); }
             // Pattern miner — runs alongside background analysis
             try {
               const mineResult = runPatternMining();
@@ -623,6 +720,7 @@ export default {
           return injection.trim() ? { prependSystemContext: injection } : {};
         } catch (e) {
           logger.error("[friction-guard] Error:", e);
+          logErrorToFile("tool_fail", "[friction-guard] pre-generation error: " + String(e));
           return {};
         }
       },

@@ -1,5 +1,21 @@
 # Changelog
 
+## 3.5.0 (2026-03-25)
+
+### Action avoidance detection (preflight pattern)
+- New `action_avoidance` category in agent-irritation registry (14 NL + 12 EN patterns)
+- Detects acknowledgment-without-action loops: agent says "ja, dat ga ik doen" repeatedly without executing
+- New `EXECUTE_NOW` constraint injected when loop detected (2+ acknowledgments in last 3 agent turns)
+- New `detectActionAvoidanceLoop` function using existing turn-history from repetition-detection
+- Integrates with existing friction-guard flow: same hook, same logging, same incident tracking
+- Daily classifier and pattern miner automatically learn new action-avoidance variants over time
+
+### Technical details
+- Added `readHistory` import from repetition-detection module
+- `EXECUTE_NOW` constraint text: hard instruction to execute immediately, no explanation
+- Detection threshold: 2/3 recent agent turns matching acknowledgment patterns
+- Registry patterns cover sycophantic acknowledgment, deferred action, and passive confirmation in both languages
+
 ## 3.4.0 (2026-03-21)
 
 ### Cold-start situation-first protocol
@@ -83,5 +99,3 @@ Initial public release.
 - Bilingual pattern matching (English + Dutch)
 - Agent-trigger detection (cliché empathy, helpdesk filler, premature structure)
 - Grounded in CMAI, LIWC-22, Grievance Dictionary, and COLING-2025 frustration detection research
-
-
