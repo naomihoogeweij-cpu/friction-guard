@@ -1,4 +1,4 @@
-# friction-guard v3.5.0
+# friction-guard v3.5.1
 ## Functional and Technical Description
 
 ---
@@ -169,8 +169,8 @@ cat > ~/.openclaw/extensions/friction-guard/openclaw.plugin.json << 'EOF'
 {
   "name": "friction-guard",
   "id": "friction-guard",
-  "version": "3.3.0",
-  "description": "Evidence-based interaction friction detection and pre-generation constraint enforcement.",
+  "version": "3.5.1",
+  "description": "Evidence-based interaction friction detection and pre-generation constraint enforcement. Learns relational mismatch patterns and adjusts agent behaviour per person.",
   "entry": "index.ts",
   "configSchema": {},
   "activation": { "event": "agent.start" }
@@ -189,7 +189,7 @@ openclaw plugins list | grep friction
 
 Expected startup log:
 ```
-[friction-guard] v3.4.0 — pre-generation constraint injection
+[friction-guard] v3.5.1 — pre-generation constraint injection
 [friction-guard] Evidence registry: 16 entries loaded
 [friction-guard] Grievance dictionary loaded: 556 NL / 464 EN stems
 [friction-guard] Agent irritation registry loaded: 7 categories, ~160 patterns
@@ -256,6 +256,8 @@ readProfile(userId)
         │
         ├──► detectUserForcedRepetition()  ← skipped if level ≥ 2
         │
+        ├──► detectActionAvoidanceLoop()   ← reads session transcript JSONL
+        │
         ├──► apply signature updates
         ├──► activate constraints
         ├──► logFragment() if level > 0
@@ -286,6 +288,7 @@ return { prependSystemContext: coldStartBlock + constraintPrompt + frictionNote 
 `stripChannelMetadata()` removes:
 - `Conversation info (untrusted metadata):` + fenced JSON blocks
 - `Sender (untrusted metadata):` + fenced JSON blocks
+- `<relevant-memories>` blocks injected by OpenClaw memory system
 - Media markers: `[media attached: ...]`, `[audio message]`, etc.
 - Tool instruction blocks: "To send an image back...", system instructions
 - Cron/heartbeat wrapper lines
@@ -347,11 +350,13 @@ Weighted Jaccard: `trigrams × 0.5 + bigrams × 0.3 + words × 0.2`
 
 ## 8. Action avoidance loop detection
 
-Runs every turn in `before_prompt_build`. Reads the last 3 agent turns from the turn-history (via `readHistory` from `repetition-detection.ts`). Matches each turn against acknowledgment patterns in the detected language (NL/EN).
+Runs every turn in `before_prompt_build`. Reads the last 8KB of the active session transcript JSONL via a bounded file descriptor read. This bypasses turn-history, which does not contain agent turns in the `before_prompt_build` context. The session ID is resolved from `sessions.json` with user-specific match preference (WhatsApp direct sessions preferred over main).
+
+Recent assistant messages are extracted from the transcript and matched against acknowledgment patterns in the detected language (NL/EN).
 
 **Detection threshold:** 2 or more matching turns out of the last 3.
 
-**Patterns:** 14 NL + 12 EN acknowledgment phrases (e.g. "ja, dat had ik moeten doen", "good point, I will"). Supplemented over time by the daily classifier and pattern miner.
+**Patterns:** 10 NL + 6 EN acknowledgment phrases (e.g. "ja, dat had ik moeten doen", "good point, I will"). Supplemented over time by the daily classifier and pattern miner.
 
 **On detection:** activates `EXECUTE_NOW` constraint and logs an incident at level 2 with signature update `helpdesk += 0.15`. The constraint instructs the model to execute the pending action in the current turn.
 
@@ -402,4 +407,4 @@ Zheng, Y., et al. (2024). *IT & People, 37*(8), 175–199.
 
 ---
 
-*friction-guard v3.5.0 — Naomi Hoogeweij, Rutka, and Claude Opus. March 2026.*
+*friction-guard v3.5.1 — Naomi Hoogeweij, Rutka, and Claude Opus. April 2026.*

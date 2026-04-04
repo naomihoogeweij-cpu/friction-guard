@@ -1,9 +1,11 @@
 {
   "name": "friction-guard",
   "id": "friction-guard",
-  "version": "3.4.0",
-  "description": "Evidence-based interaction friction detection and pre-generation constraint enforcement.",
+  "version": "3.5.1",
+  "description": "Evidence-based interaction friction detection and pre-generation constraint enforcement. Learns relational mismatch patterns and adjusts agent behaviour per person.",
   "entry": "index.ts",
   "configSchema": {},
-  "activation": { "event": "agent.start" }
+  "activation": {
+    "event": "agent.start"
+  }
 }

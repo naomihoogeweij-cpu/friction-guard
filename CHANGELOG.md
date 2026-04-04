@@ -1,5 +1,19 @@
 # Changelog
 
+## 3.5.1 (2026-04-04)
+
+### Action avoidance: transcript-based detection (bugfix)
+- `detectActionAvoidanceLoop` now reads directly from session transcript JSONL instead of turn-history
+- Fix: turn-history has no agent turns in `before_prompt_build` context, making the v3.5.0 detection non-functional
+- Reads last 8KB of transcript via file descriptor (bounded, no full file load)
+- Session ID resolved from sessions.json with user-specific match preference
+
+### Code compaction
+- `agent-irritation-classifier.ts`: removed verbose section headers and documentation comments
+- `agent-irritation-matching.ts`: compact comments, removed redundant JSDoc
+- `cold-start-priming.ts`: condensed header documentation to 3-line summary
+- `openclaw.plugin.json`: extended description, reformatted activation block
+
 ## 3.5.0 (2026-03-25)
 
 ### Action avoidance detection (preflight pattern)
@@ -32,7 +46,7 @@
 - New `agent-irritation-registry.json`: 7 evidence-based categories of LLM output patterns that empirically correlate with user frustration
 - Categories: sycophancy, fake humanity, helpdesk filler, overexplanation, incorrect repair, emotional incongruence, premature solutioning
 - ~100 NL + EN patterns grounded in: Sharma et al. (2023, Anthropic), Brendel et al. (2023, JMIS), Crolic et al. (2022), Ozuem et al. (2024), ITP/Emerald (2024), Weiler et al. (2023, Electronic Markets), Pavone et al. (2023)
-- Context-dependent matching: emotional incongruence and premature solutioning only fire when user friction level ≥ 1
+- Context-dependent matching: emotional incongruence and premature solutioning only fire when user friction level >= 1
 - New `agent-irritation-matching.ts`: pattern matcher for agent output
 
 ### LLM post-hoc classifier (Option 3)
@@ -40,7 +54,7 @@
 - Extracts (agent-turn, user-friction-response) pairs from incident logs and turn history
 - Sends pairs to LLM for classification — identifies specific problematic phrases and categories
 - Candidate bank with running severity averages and observation counts
-- Promotion threshold: phrases flagged ≥3 times are automatically promoted to dynamic bans
+- Promotion threshold: phrases flagged >=3 times are automatically promoted to dynamic bans
 - 30-day candidate expiry for phrases that stop appearing
 - Daily execution cycle via OpenClaw's model API (when available)
 - Promoted bans merged into constraint prompt alongside static bans
@@ -49,7 +63,7 @@
 - New `agent-pattern-miner.ts`: statistical n-gram analysis of agent output preceding friction vs calm interactions
 - Extracts bigrams, trigrams, and 4-grams from agent responses
 - Compares friction rate per n-gram against baseline friction rate
-- Promotion criteria: ≥5 observations, ≥60% friction rate, ≥2x lift over baseline
+- Promotion criteria: >=5 observations, >=60% friction rate, >=2x lift over baseline
 - Stop-word filtering (NL + EN) to ignore function-word n-grams
 - Runs every 15 minutes alongside background analysis
 - Mined patterns merged into dynamic ban list alongside LLM-classifier promoted bans
@@ -64,8 +78,8 @@
 
 ### Reduced forced-repeat false positives
 - Raised user repetition threshold from 0.50 to 0.65
-- Added minimum shared trigram requirement (≥3) — high Jaccard ratio alone is no longer sufficient
-- Moved forced-repeat detection after friction assessment; skipped when friction level ≥ 2 (escalation, not repetition)
+- Added minimum shared trigram requirement (>=3) — high Jaccard ratio alone is no longer sufficient
+- Moved forced-repeat detection after friction assessment; skipped when friction level >= 2 (escalation, not repetition)
 
 ### Input sanitizing
 - Strip WhatsApp/channel metadata envelopes (Conversation info, Sender blocks with fenced JSON)
@@ -78,7 +92,7 @@
 - Loaded Dutch Grievance Dictionary (van der Vegt et al., 2021) as additional detection layer
 - 556 Dutch and 464 English stemmed words across four friction-relevant categories: frustration, desperation, grievance, hate
 - LIWC-style prefix matching with pre-compiled regexes
-- Severity mapping from 7–10 goodness-of-fit scale to 0.3–0.9 friction severity
+- Severity mapping from 7-10 goodness-of-fit scale to 0.3-0.9 friction severity
 - Early exit per category (max 3 matches) for bounded performance
 - Dictionary licensed CC BY 4.0, source: https://github.com/Isabellevdv/grievancedictionary
 
@@ -97,5 +111,5 @@ Initial public release.
 ### Evidence
 - 16-entry registry across 4 severity levels
 - Bilingual pattern matching (English + Dutch)
-- Agent-trigger detection (cliché empathy, helpdesk filler, premature structure)
+- Agent-trigger detection (cliche empathy, helpdesk filler, premature structure)
 - Grounded in CMAI, LIWC-22, Grievance Dictionary, and COLING-2025 frustration detection research
