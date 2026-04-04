@@ -1,6 +1,6 @@
 // ──────────────────────────────────────────────
 // friction-guard — OpenClaw plugin
-// v3.5.1
+// v4.0.0
 //
 // Evidence-based interaction friction detection
 // and pre-generation constraint injection.
@@ -9,83 +9,33 @@
 // ──────────────────────────────────────────────
 
 import {
-  readProfile,
-  writeProfile,
-  inferConstraints,
-  getUserEntries,
-  getAgentEntries,
-  loadEvidence,
-  configurePaths,
-  setConstraintDecayHours,
-  clamp01,
-  escapeRegExp,
-  type UserProfile,
-  type EvidenceEntry,
-  type FrictionLevel,
-  type Constraint,
-  type Signature,
-  type FrictionGuardConfig,
+  readProfile, writeProfile, inferConstraints, getUserEntries, getAgentEntries,
+  loadEvidence, configurePaths, setConstraintDecayHours, clamp01, escapeRegExp,
+  type UserProfile, type EvidenceEntry, type FrictionLevel, type Constraint,
+  type Signature, type FrictionGuardConfig,
 } from "../../workspace/interaction/friction-policy";
-
 import { logFragment } from "../../workspace/interaction/incident-log";
-import {
-  detectUserForcedRepetition,
-  findRepeatedAgentPhrases,
-  recordTurn,
-  readHistory,
-} from "../../workspace/interaction/repetition-detection";
+import { detectUserForcedRepetition, findRepeatedAgentPhrases, recordTurn, readHistory } from "../../workspace/interaction/repetition-detection";
 import { runBackgroundAnalysis } from "../../workspace/interaction/background-analysis";
-import {
-  loadGrievanceDictionary,
-  matchGrievance,
-  grievanceFrictionLevel,
-  grievanceConstraints,
-  grievanceSignatureUpdates,
-} from "../../workspace/interaction/grievance-matching";
-import {
-  loadAgentIrritationRegistry,
-  matchAgentIrritation,
-  agentIrritationConstraints,
-  agentIrritationBanPhrases,
-} from "../../workspace/interaction/agent-irritation-matching";
-import {
-  getPromotedBans,
-  runClassification,
-  getClassifierStats,
-} from "../../workspace/interaction/agent-irritation-classifier";
-import {
-  runPatternMining,
-  getMinedPatterns,
-} from "../../workspace/interaction/agent-pattern-miner";
-import {
-  loadPrimingExamples,
-  buildColdStartPrompt,
-  isColdStart,
-} from "../../workspace/interaction/cold-start-priming";
+import { loadGrievanceDictionary, matchGrievance, grievanceFrictionLevel, grievanceConstraints, grievanceSignatureUpdates } from "../../workspace/interaction/grievance-matching";
+import { loadAgentIrritationRegistry, matchAgentIrritation, agentIrritationConstraints, agentIrritationBanPhrases } from "../../workspace/interaction/agent-irritation-matching";
+import { getPromotedBans, runClassification, getClassifierStats } from "../../workspace/interaction/agent-irritation-classifier";
+import { runPatternMining, getMinedPatterns } from "../../workspace/interaction/agent-pattern-miner";
+import { loadPrimingExamples, buildColdStartPrompt, isColdStart } from "../../workspace/interaction/cold-start-priming";
 
 import { appendFileSync, mkdirSync, readFileSync, existsSync, openSync, fstatSync, readSync, closeSync } from "node:fs";
+import { exec } from "node:child_process";
 import { join, dirname } from "node:path";
 
 // --- Action avoidance detection ---
 const ACTION_AVOIDANCE_PATTERNS_NL = [
-  "ja, dat had ik moeten doen",
-  "klopt, dat ga ik nu",
-  "dat is helder",
-  "goed punt, ik ga",
-  "je hebt gelijk, ik moet",
-  "ik ga dat nu nalopen",
-  "eens, dat had niet",
-  "inderdaad, dat moet",
-  "dat is nu opgeslagen",
-  "dat klopt, en ik had",
+  "ja, dat had ik moeten doen", "klopt, dat ga ik nu", "dat is helder", "goed punt, ik ga",
+  "je hebt gelijk, ik moet", "ik ga dat nu nalopen", "eens, dat had niet", "inderdaad, dat moet",
+  "dat is nu opgeslagen", "dat klopt, en ik had",
 ];
 const ACTION_AVOIDANCE_PATTERNS_EN = [
-  "yes, i should have done that",
-  "good point, i will",
-  "you're right, i need to",
-  "i'm going to do that now",
-  "understood, i will",
-  "noted, i should have",
+  "yes, i should have done that", "good point, i will", "you're right, i need to",
+  "i'm going to do that now", "understood, i will", "noted, i should have",
 ];
 
 function detectActionAvoidanceLoop(userId: string, lang: "nl" | "en"): boolean {
@@ -95,58 +45,64 @@ function detectActionAvoidanceLoop(userId: string, lang: "nl" | "en"): boolean {
     let sessionId: string | null = null;
     for (const [key, val] of Object.entries(sessionsData)) {
       const v = val as any;
-      if (key.includes(userId) || key === "agent:main:main") {
-        sessionId = v.sessionId;
-        if (key.includes(userId)) break;
-      }
+      if (key.includes(userId) || key === "agent:main:main") { sessionId = v.sessionId; if (key.includes(userId)) break; }
     }
     if (!sessionId) return false;
     const transcriptPath = join(process.env.HOME || "/root", ".openclaw", "agents", "main", "sessions", sessionId + ".jsonl");
     if (!existsSync(transcriptPath)) return false;
-    const fd = openSync(transcriptPath, "r");
-    const stats = fstatSync(fd);
-    const readSize = Math.min(stats.size, 8192);
-    const buf = Buffer.alloc(readSize);
-    readSync(fd, buf, 0, readSize, Math.max(0, stats.size - readSize));
-    closeSync(fd);
-    const tail = buf.toString("utf8");
-    const lines = tail.split("\n").filter(l => l.trim());
+    const fd = openSync(transcriptPath, "r"); const stats = fstatSync(fd);
+    const readSize = Math.min(stats.size, 8192); const buf = Buffer.alloc(readSize);
+    readSync(fd, buf, 0, readSize, Math.max(0, stats.size - readSize)); closeSync(fd);
+    const lines = buf.toString("utf8").split("\n").filter(l => l.trim());
     const agentTexts: string[] = [];
     for (const line of lines) {
       try {
-        const entry = JSON.parse(line);
-        const msg = entry?.message;
+        const entry = JSON.parse(line); const msg = entry?.message;
         if (!msg || msg.role !== "assistant") continue;
         let text = "";
         if (typeof msg.content === "string") text = msg.content;
-        else if (Array.isArray(msg.content)) {
-          const tp = msg.content.find((p: any) => p.type === "text" && typeof p.text === "string");
-          if (tp) text = tp.text;
-        }
+        else if (Array.isArray(msg.content)) { const tp = msg.content.find((p: any) => p.type === "text" && typeof p.text === "string"); if (tp) text = tp.text; }
         if (text.length > 10) agentTexts.push(text.slice(0, 500));
       } catch {}
     }
     if (agentTexts.length < 2) return false;
     const patterns = lang === "nl" ? ACTION_AVOIDANCE_PATTERNS_NL : ACTION_AVOIDANCE_PATTERNS_EN;
-    const last3 = agentTexts.slice(-3);
     let matches = 0;
-    for (const text of last3) {
-      const lowered = text.toLowerCase();
-      if (patterns.some(p => lowered.includes(p))) matches++;
-    }
+    for (const text of agentTexts.slice(-3)) { if (patterns.some(p => text.toLowerCase().includes(p))) matches++; }
     return matches >= 2;
-  } catch {
-    return false;
-  }
+  } catch { return false; }
 }
 
+// --- Semantic expansion cache ---
+const SEMANTIC_DIR = join(process.env.HOME || "/root", ".openclaw", "workspace", "memory", "semantic");
+const EXPANDED_BANS_PATH = join(SEMANTIC_DIR, "expanded-bans.json");
+const SEMANTIC_SCRIPT = join(process.env.HOME || "/root", ".openclaw", "workspace", "interaction", "semantic-expansion.py");
+
+function loadExpandedBanVariants(): string[] {
+  if (!existsSync(EXPANDED_BANS_PATH)) return [];
+  try {
+    const data = JSON.parse(readFileSync(EXPANDED_BANS_PATH, "utf8"));
+    const variants: string[] = [];
+    for (const expansion of Object.values(data.expansions || {})) {
+      for (const v of (expansion as any[])) variants.push(v.phrase);
+    }
+    return variants;
+  } catch { return []; }
+}
+
+function triggerSemanticRefresh(logger: any) {
+  if (!existsSync(SEMANTIC_SCRIPT)) return;
+  exec(`python3 ${SEMANTIC_SCRIPT} refresh`, { timeout: 120000 }, (err, stdout, stderr) => {
+    if (err) { logger.warn("[friction-guard] Semantic refresh error:", err.message); return; }
+    if (stdout.trim()) logger.info("[friction-guard] Semantic: " + stdout.trim().split("\n").pop());
+  });
+}
+
+// --- Central error logging ---
 const ERROR_LOG_PATH = join(process.env.HOME || "/root", ".openclaw", "workspace", "memory", "error-log.jsonl");
 
 function logErrorToFile(category: string, summary: string) {
-  const entry = JSON.stringify({
-    ts: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
-    category, summary: String(summary).slice(0, 300), escalated: false, source: "friction-guard",
-  });
+  const entry = JSON.stringify({ ts: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"), category, summary: String(summary).slice(0, 300), escalated: false, source: "friction-guard" });
   try { mkdirSync(dirname(ERROR_LOG_PATH), { recursive: true }); appendFileSync(ERROR_LOG_PATH, entry + "\n"); } catch (_) {}
 }
 
@@ -161,19 +117,15 @@ let _lastClassifierRun = 0;
 
 function detectLanguage(text: string, defaultLang: string = "en"): "nl" | "en" {
   const nlMarkers = /\b(ik|je|het|een|dat|niet|maar|ook|wel|nog|van|voor|naar|dit|wat)\b/gi;
-  const matches = text.match(nlMarkers) || [];
-  if (matches.length >= 2) return "nl";
-  return defaultLang as "nl" | "en";
+  return (text.match(nlMarkers) || []).length >= 2 ? "nl" : defaultLang as "nl" | "en";
 }
 
 function matchUserInput(userText: string, lang: string): { entry: EvidenceEntry; matched: string }[] {
   const lowered = userText.toLowerCase();
   const results: { entry: EvidenceEntry; matched: string }[] = [];
   for (const entry of getUserEntries()) {
-    if (entry.detection === "computed") continue;
-    if (!entry.patterns) continue;
-    const phrases = entry.patterns[lang] || entry.patterns["en"] || [];
-    for (const phrase of phrases) {
+    if (entry.detection === "computed" || !entry.patterns) continue;
+    for (const phrase of (entry.patterns[lang] || entry.patterns["en"] || [])) {
       if (lowered.includes(phrase.toLowerCase())) { results.push({ entry, matched: phrase }); break; }
     }
   }
@@ -182,10 +134,9 @@ function matchUserInput(userText: string, lang: string): { entry: EvidenceEntry;
 
 function computeStructuralMarkers(userText: string, profile: UserProfile): EvidenceEntry[] {
   const results: EvidenceEntry[] = [];
-  const computed = getUserEntries().filter((e) => e.detection === "computed");
-  for (const entry of computed) {
+  for (const entry of getUserEntries().filter((e) => e.detection === "computed")) {
     switch (entry.marker) {
-      case "message_shortening": { const avg = profile.baseline.avgMessageLength; if (avg > 0 && userText.length < avg * 0.5) results.push(entry); break; }
+      case "message_shortening": { if (profile.baseline.avgMessageLength > 0 && userText.length < profile.baseline.avgMessageLength * 0.5) results.push(entry); break; }
       case "greeting_dropout": { if (profile.baseline.greetingPresent && profile.baseline.turnCount > 3 && !/\b(hi|hey|hello|good morning|good afternoon|hoi|hallo|goedemorgen|goedemiddag)\b/i.test(userText)) results.push(entry); break; }
     }
   }
@@ -205,11 +156,9 @@ function computeBaselineDeviation(userText: string, profile: UserProfile): numbe
 
 function updateBaseline(userText: string, profile: UserProfile, level: FrictionLevel) {
   if (level > 0) return;
-  const bl = profile.baseline;
-  const alpha = Math.min(0.1, 1 / (bl.turnCount + 1));
+  const bl = profile.baseline; const alpha = Math.min(0.1, 1 / (bl.turnCount + 1));
   bl.avgMessageLength = bl.avgMessageLength * (1 - alpha) + userText.length * alpha;
-  const sentences = userText.split(/[.!?]+/).filter((s) => s.trim().length > 0);
-  bl.avgSentenceCount = bl.avgSentenceCount * (1 - alpha) + sentences.length * alpha;
+  bl.avgSentenceCount = bl.avgSentenceCount * (1 - alpha) + userText.split(/[.!?]+/).filter((s) => s.trim().length > 0).length * alpha;
   if (bl.turnCount < 5) bl.greetingPresent = /\b(hi|hey|hello|good morning|hoi|hallo|goedemorgen)\b/i.test(userText);
   bl.turnCount++; bl.lastCalibrated = new Date().toISOString();
   profile.recentTurnLengths.push(userText.length);
@@ -222,14 +171,12 @@ function assessFriction(userText: string, profile: UserProfile, lang: string): F
   const patternMatches = matchUserInput(userText, lang);
   const structuralMatches = computeStructuralMarkers(userText, profile);
   const baselineDeviation = computeBaselineDeviation(userText, profile);
-  let maxLevel: FrictionLevel = 0;
-  const allMatched: EvidenceEntry[] = [];
+  let maxLevel: FrictionLevel = 0; const allMatched: EvidenceEntry[] = [];
   for (const { entry } of patternMatches) { allMatched.push(entry); if (entry.level > maxLevel) maxLevel = entry.level as FrictionLevel; }
   for (const entry of structuralMatches) { allMatched.push(entry); if (entry.level > maxLevel) maxLevel = entry.level as FrictionLevel; }
   if (maxLevel === 0 && baselineDeviation > 0.35) maxLevel = 1;
   const grievanceMatches = matchGrievance(userText, lang as "nl" | "en");
-  const grievanceLevel = grievanceFrictionLevel(grievanceMatches);
-  if (grievanceLevel > maxLevel) maxLevel = grievanceLevel;
+  if (grievanceFrictionLevel(grievanceMatches) > maxLevel) maxLevel = grievanceFrictionLevel(grievanceMatches);
   const constraints = new Set<Constraint>();
   for (const entry of allMatched) { if (entry.severity + baselineDeviation * 0.3 > 0.3) for (const c of entry.suggestedConstraints) constraints.add(c); }
   for (const c of grievanceConstraints(grievanceMatches)) constraints.add(c);
@@ -246,10 +193,15 @@ function buildConstraintPrompt(profile: UserProfile): string {
   const activeBans = profile.bannedPhrases.filter((b) => new Date(b.expiresAt).getTime() > Date.now());
   const promoted = getPromotedBans(); const mined = getMinedPatterns();
   const existingPhrases = new Set(activeBans.map((b) => b.phrase));
-  const allBanPhrases = [...activeBans.map((b) => b.phrase), ...promoted.filter((p) => !existingPhrases.has(p)), ...mined.filter((p) => !existingPhrases.has(p) && !promoted.includes(p))];
+  const allBanPhrases = [
+    ...activeBans.map((b) => b.phrase),
+    ...promoted.filter((p) => !existingPhrases.has(p)),
+    ...mined.filter((p) => !existingPhrases.has(p) && !promoted.includes(p)),
+    ...loadExpandedBanVariants().filter((p) => !existingPhrases.has(p)),
+  ];
   if (active.length === 0 && allBanPhrases.length === 0) return "";
   const rules: string[] = []; const ids = new Set(active.map((c) => c.id));
-  if (allBanPhrases.length > 0) { const banList = allBanPhrases.map((b) => `"${b}"`).join(", "); rules.push(`HARD BAN — do NOT use any of these phrases or close variants: ${banList}. This is non-negotiable. Do not rephrase them, do not use synonyms that convey the same filler pattern.`); }
+  if (allBanPhrases.length > 0) rules.push(`HARD BAN — do NOT use any of these phrases or close variants: ${allBanPhrases.map((b) => `"${b}"`).join(", ")}. This is non-negotiable. Do not rephrase them, do not use synonyms that convey the same filler pattern.`);
   if (ids.has("BAN_CLICHE_PHRASES")) rules.push("Avoid all performative empathy. No cliché comfort phrases.");
   if (ids.has("NO_HELPDESK")) rules.push("Do not use helpdesk filler language. No \"would you like me to\", \"let me know\", \"great question\". Respond directly.");
   if (ids.has("NO_UNASKED_ADVICE_EMOTIONAL")) rules.push("When the user expresses emotion without asking for advice, do not give advice, steps, plans, or solutions.");
@@ -277,8 +229,7 @@ function stripChannelMetadata(text: string): string {
   cleaned = cleaned.replace(/^(?:To (?:send|reply|respond|return|attach|include|upload)[\s\S]*?)(?=\n\n|\n[A-Z]|$)/gim, "");
   cleaned = cleaned.replace(/^(?:Note:|Instructions?:|System:|Context:).*$/gm, "");
   cleaned = cleaned.replace(/^.*(?:send (?:the |an? )?image|return (?:the |an? )?(?:image|file|media)|attach (?:the |an? )?(?:image|file)).*$/gim, "");
-  cleaned = cleaned.replace(/\n{3,}/g, "\n\n").trim();
-  return cleaned;
+  return cleaned.replace(/\n{3,}/g, "\n\n").trim();
 }
 
 function extractLastAgentMessage(messages: any[]): string | null {
@@ -294,13 +245,11 @@ function extractLastUserMessage(messages: any[]): string | null {
 }
 
 function extractUserId(ctx: any): string { return ctx?.context?.senderId || ctx?.context?.sessionEntry?.peer || ctx?.sessionKey?.split(":")?.pop() || "default"; }
-
 function cleanExpiredBans(profile: UserProfile) { profile.bannedPhrases = profile.bannedPhrases.filter((b) => new Date(b.expiresAt).getTime() > Date.now()); }
 
 function addBan(profile: UserProfile, phrase: string, severity: number, sourceId: string) {
   if (profile.bannedPhrases.some((b) => b.phrase === phrase)) return;
-  const ttl = BAN_TTL_MS * (0.5 + severity);
-  profile.bannedPhrases.push({ phrase, severity, source: sourceId, expiresAt: new Date(Date.now() + ttl).toISOString() });
+  profile.bannedPhrases.push({ phrase, severity, source: sourceId, expiresAt: new Date(Date.now() + BAN_TTL_MS * (0.5 + severity)).toISOString() });
 }
 
 export default {
@@ -316,7 +265,7 @@ export default {
     if (config.backgroundIntervalMinutes) BACKGROUND_INTERVAL_MS = config.backgroundIntervalMinutes * 60 * 1000;
     configurePaths(config);
     const defaultLang = config.defaultLanguage || "en";
-    logger.info("[friction-guard] v3.5.1 — pre-generation constraint injection");
+    logger.info("[friction-guard] v4.0.0 — pre-generation constraint injection");
     try { const entries = loadEvidence(); logger.info(`[friction-guard] Evidence registry: ${entries.length} entries loaded`); loadGrievanceDictionary(); loadAgentIrritationRegistry(); loadPrimingExamples(); } catch (e) { logger.warn("[friction-guard] Could not load evidence registry:", e); logErrorToFile("tool_fail", "[friction-guard] evidence registry load failed: " + String(e)); }
 
     api.on("before_prompt_build", (event: any, ctx: any) => {
@@ -337,14 +286,12 @@ export default {
           for (const [sig, inc] of Object.entries(assessment.signatureUpdates)) profile.signatures[sig as Signature] = clamp01(profile.signatures[sig as Signature] + (inc as number));
           for (const constraint of assessment.constraintsToActivate) { const existing = profile.constraints.find((c) => c.id === constraint); if (existing) { existing.enabled = true; existing.lastTriggered = new Date().toISOString(); } else { profile.constraints.push({ id: constraint, enabled: true, confidence: 0.65, lastTriggered: new Date().toISOString() }); } }
           if (assessment.level > 0) logFragment(userId, "user", userText.slice(0, 300), assessment.level, assessment.matchedEntries.map((e) => e.id), assessment.baselineDeviation, assessment.constraintsToActivate, assessment.signatureUpdates);
-          for (const entry of assessment.matchedEntries) { if (entry.level >= 2 && entry.patterns) { const phrases = entry.patterns[lang] || entry.patterns["en"] || []; for (const phrase of phrases) { if (userText.toLowerCase().includes(phrase)) { for (const ap of getAgentEntries()) { if (ap.suggestedConstraints.some((c) => entry.suggestedConstraints.includes(c))) { const agentPhrases = ap.patterns?.[lang] || ap.patterns?.["en"] || []; for (const agentPhrase of agentPhrases) addBan(profile, agentPhrase, entry.severity, entry.id); } } break; } } } }
+          for (const entry of assessment.matchedEntries) { if (entry.level >= 2 && entry.patterns) { const phrases = entry.patterns[lang] || entry.patterns["en"] || []; for (const phrase of phrases) { if (userText.toLowerCase().includes(phrase)) { for (const ap of getAgentEntries()) { if (ap.suggestedConstraints.some((c) => entry.suggestedConstraints.includes(c))) { for (const agentPhrase of (ap.patterns?.[lang] || ap.patterns?.["en"] || [])) addBan(profile, agentPhrase, entry.severity, entry.id); } } break; } } } }
           profile.currentFrictionLevel = assessment.level;
           updateBaseline(userText, profile, assessment.level);
-          inferConstraints(profile);
-          writeProfile(profile);
-          const coldStartBlock = buildColdStartPrompt(profile.baseline.turnCount);
-          const injection = coldStartBlock + buildConstraintPrompt(profile) + buildFrictionNote(assessment.level);
-          if (Date.now() - _lastBackgroundRun > BACKGROUND_INTERVAL_MS) { _lastBackgroundRun = Date.now(); try { runBackgroundAnalysis(userId); } catch (e) { logger.warn("[friction-guard] Background analysis error:", e); logErrorToFile("tool_fail", "[friction-guard] background analysis failed: " + String(e)); } try { const mineResult = runPatternMining(); if (mineResult.promoted.length > 0) logger.info(`[friction-guard] Pattern miner: ${mineResult.promoted.length} new patterns promoted`); } catch (e) { logger.warn("[friction-guard] Pattern miner error:", e); } }
+          inferConstraints(profile); writeProfile(profile);
+          const injection = buildColdStartPrompt(profile.baseline.turnCount) + buildConstraintPrompt(profile) + buildFrictionNote(assessment.level);
+          if (Date.now() - _lastBackgroundRun > BACKGROUND_INTERVAL_MS) { _lastBackgroundRun = Date.now(); try { runBackgroundAnalysis(userId); } catch (e) { logger.warn("[friction-guard] Background analysis error:", e); logErrorToFile("tool_fail", "[friction-guard] background analysis failed: " + String(e)); } try { const mineResult = runPatternMining(); if (mineResult.promoted.length > 0) logger.info(`[friction-guard] Pattern miner: ${mineResult.promoted.length} new patterns promoted`); } catch (e) { logger.warn("[friction-guard] Pattern miner error:", e); } triggerSemanticRefresh(logger); }
           if (Date.now() - _lastClassifierRun > CLASSIFIER_INTERVAL_MS) { _lastClassifierRun = Date.now(); if (typeof api.complete === "function") { runClassification(async (prompt: string) => { const result = await api.complete({ messages: [{ role: "user", content: prompt }], maxTokens: 2000 }); return typeof result === "string" ? result : result?.content || ""; }).then((r) => { if (r.newCandidates > 0 || r.promoted.length > 0) logger.info(`[friction-guard] Classifier: ${r.newCandidates} new candidates, ${r.promoted.length} promoted to ban`); }).catch((e) => logger.warn("[friction-guard] Classifier error:", e)); } }
           return injection.trim() ? { prependSystemContext: injection } : {};
         } catch (e) { logger.error("[friction-guard] Error:", e); logErrorToFile("tool_fail", "[friction-guard] pre-generation error: " + String(e)); return {}; }
