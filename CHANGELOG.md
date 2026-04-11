@@ -1,5 +1,48 @@
 # Changelog
 
+## 4.1.0 (2026-04-11)
+
+### EXECUTE_FIRST: behavioral pattern detection for confirm-without-deliver loops
+
+Friction-guard v4.0 detected what the agent *says* but not what the agent *does*. When Rutka confirmed intent multiple times without executing (e.g., "Klopt, ik pak dat nu" → no tool call → "Ik ga het fixen" → no tool call), friction-guard stayed silent because the language was clean. Meanwhile the user escalated from "doe dan!" to caps to profanity.
+
+v4.1 closes this gap with a new behavioral detection layer.
+
+### New module: `friction-execute-first.ts`
+- Turn-by-turn state machine tracking agent delivery vs confirmation
+- `isConfirmWithoutDeliver()`: detects NL/EN confirmation language (klopt, snap, helder, genoteerd, ik pak, got it, on it, fixing...) in agent turns that contain zero `tool_use` blocks
+- `processTurn()`: maintains per-user state across the conversation
+- Compound trigger: `confirmWithoutDeliverCount >= 2` AND `userEscalationPeak >= L2` → `EXECUTE_FIRST` activates
+- Reset: any agent turn with actual tool execution resets counter and deactivates override
+- `getExecuteFirstPrompt()`: returns system prompt injection when active
+
+### New evidence entries
+- `AGENT-004` (`confirm_without_deliver`): behavioral pattern, computed detection, suggests `EXECUTE_FIRST`
+- `AGENT-005` (`escalation_without_pivot`): compound trigger combining user L2+ escalation with agent stagnation
+
+### New constraint: `EXECUTE_FIRST`
+- Hard override injected into system prompt when compound trigger fires
+- Rules: stop explaining, stop status updates, execute shortest path to result, report only the result
+- Stays active until agent produces a concrete result (tool call with output)
+- Threshold 0.5 (lower than other constraints — this pattern is severe)
+
+### New signature: `confirm_without_deliver`
+- Added to `Signature` type and `UserProfile`
+- Tracked in `CONSTRAINT_THRESHOLDS` with threshold 0.5
+- Incremented by 0.15 × consecutive confirm-without-deliver count
+
+### Integration
+- `index.ts`: imports `friction-execute-first`, maintains per-user `ExecuteFirstState` map
+- `lastAgentHadToolCall()`: inspects message history for `tool_use`/`tool_call` blocks
+- Wired into `before_prompt_build` hook after action-avoidance detection (which remains as fallback)
+- Evidence registry bumped to v4.1.0 (18 entries: 13 user-side + 5 agent-side)
+
+### Design decisions
+- Behavioral detection supplements but does not replace linguistic detection
+- `EXECUTE_NOW` (v3.5 string-matching fallback) preserved alongside `EXECUTE_FIRST` (v4.1 tool-tracking)
+- State machine is per-user, in-memory (resets on process restart — acceptable for session-length patterns)
+- No new API calls: detection uses existing message history already available in `before_prompt_build`
+
 ## 4.0.0 (2026-04-04)
 
 ### Semantic search integration

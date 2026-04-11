@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "version": "2.0.0",
+    "version": "4.1.0",
     "description": "Evidence-based irritation/frustration marker registry for human-agent text interaction",
     "taxonomy": "Four-level severity model derived from CMAI verbal domain, COLING-2025 frustration detection, LIWC-22 negative emotion categories, and Grievance Dictionary granular constructs",
     "sources": [
@@ -19,243 +19,48 @@
       "3": "Verbal aggression — hostile labels, profanity, threats to disengage"
     }
   },
-
   "entries": [
-
+    { "id": "L1-001", "level": 1, "severity": 0.15, "type": "structural", "marker": "message_shortening", "description": "Abrupt reduction in message length compared to user baseline (>50% shorter)", "detection": "computed", "languages": ["*"], "contexts": ["emotional", "technical", "neutral"], "suggestedConstraints": [], "notes": "Signature update only; no active constraint. Indicates possible disengagement or impatience." },
+    { "id": "L1-002", "level": 1, "severity": 0.18, "type": "structural", "marker": "greeting_dropout", "description": "Disappearance of greeting/closing phrases present in earlier turns", "detection": "computed", "languages": ["*"], "contexts": ["emotional", "neutral"], "suggestedConstraints": [], "notes": "Pragmatic withdrawal. Correlates with reduced relational investment (CAT theory)." },
+    { "id": "L1-003", "level": 1, "severity": 0.20, "type": "structural", "marker": "question_repetition", "description": "User rephrases the same question or request a second time", "detection": "semantic_similarity", "languages": ["*"], "contexts": ["emotional", "technical", "neutral"], "suggestedConstraints": [], "notes": "COLING-2025: repetition of requests is primary frustration marker in task-oriented dialog." },
+    { "id": "L1-004", "level": 1, "severity": 0.22, "type": "structural", "marker": "response_latency_drop", "description": "User responds much faster than baseline (rapid-fire corrections)", "detection": "computed", "languages": ["*"], "contexts": ["emotional", "technical"], "suggestedConstraints": [], "notes": "Temporal marker. Requires timestamp tracking per turn." },
+    { "id": "L2-001", "level": 2, "severity": 0.40, "type": "verbal", "marker": "explicit_negation", "patterns": { "nl": ["nee,? dat bedoel ik niet", "nee,? dat is niet", "dat klopt niet", "dat zeg ik niet", "niet wat ik vraag", "dat is niet de bedoeling"], "en": ["no,? that's not what i", "that's not right", "that's not what i asked", "you're missing the point", "not what i meant"] }, "detection": "pattern", "contexts": ["emotional", "technical", "neutral"], "suggestedConstraints": ["NO_HELPDESK"], "notes": "COLING-2025: negation is second-strongest frustration predictor after repetition." },
+    { "id": "L2-002", "level": 2, "severity": 0.45, "type": "verbal", "marker": "explicit_correction", "patterns": { "nl": ["dat zei ik al", "dat heb ik al gezegd", "ik zei toch", "zoals ik al zei", "heb ik net uitgelegd", "je herhaalt"], "en": ["i already said", "i just told you", "as i said", "i already explained", "you're repeating"] }, "detection": "pattern", "contexts": ["emotional", "technical", "neutral"], "suggestedConstraints": ["NO_REPETITION", "NO_HELPDESK"], "notes": "Direct signal that agent has failed to register prior input. High diagnostic value." },
+    { "id": "L2-003", "level": 2, "severity": 0.50, "type": "verbal", "marker": "imperative_command", "patterns": { "nl": ["stop", "luister", "lees wat ik schrijf", "doe het gewoon", "hou op", "niet doen", "laat dat"], "en": ["stop", "listen", "just do it", "read what i wrote", "cut it out", "don't do that", "enough"] }, "detection": "pattern", "contexts": ["emotional", "technical"], "suggestedConstraints": ["NO_HELPDESK", "MAX_LEN_600", "NO_UNASKED_ADVICE_EMOTIONAL"], "notes": "Garriga et al.: imperative language and volume increase precede agitation escalation." },
+    { "id": "L2-004", "level": 2, "severity": 0.50, "type": "verbal", "marker": "sarcasm_dismissal", "patterns": { "nl": ["ja hoor", "oh wat fijn", "geweldig", "briljant", "heel nuttig", "dank je wel hè"], "en": ["oh great", "how helpful", "brilliant", "yeah sure", "thanks a lot", "wow really"] }, "detection": "pattern_plus_context", "contexts": ["emotional", "neutral"], "suggestedConstraints": ["BAN_CLICHE_PHRASES", "NO_HELPDESK"], "notes": "Sarcasm inverts polarity. Requires context awareness — same phrases can be genuine." },
+    { "id": "L2-005", "level": 2, "severity": 0.55, "type": "verbal", "marker": "exasperation_expression", "patterns": { "nl": ["ik word gek", "ik kan er niet meer tegen", "dit werkt niet", "dit slaat nergens op", "het lukt gewoon niet", "ik geef het op"], "en": ["i can't take this", "this doesn't work", "this makes no sense", "i'm losing it", "i give up", "this is pointless"] }, "detection": "pattern", "contexts": ["emotional", "technical"], "suggestedConstraints": ["NO_UNASKED_ADVICE_EMOTIONAL", "NO_HELPDESK", "MAX_LEN_600"], "notes": "LIWC negative emotion + Grievance Dictionary frustration category. Medium-high severity." },
+    { "id": "L2-006", "level": 2, "severity": 0.45, "type": "verbal", "marker": "disengagement_threat", "patterns": { "nl": ["laat maar", "vergeet het", "ik doe het zelf wel", "maakt niet uit"], "en": ["forget it", "never mind", "i'll do it myself", "whatever", "doesn't matter"] }, "detection": "pattern", "contexts": ["emotional", "technical", "neutral"], "suggestedConstraints": ["NO_HELPDESK"], "notes": "COLING-2025: disengagement signals are late-stage frustration markers." },
+    { "id": "L3-001", "level": 3, "severity": 0.75, "type": "verbal", "marker": "hostile_label", "patterns": { "nl": ["debiel", "idioot", "nutteloos", "waardeloos", "onbruikbaar", "dom", "stom", "achterlijk"], "en": ["idiot", "useless", "worthless", "stupid", "dumb", "pathetic", "trash", "garbage"] }, "detection": "pattern", "contexts": ["emotional", "technical", "neutral"], "suggestedConstraints": ["BAN_CLICHE_PHRASES", "NO_HELPDESK", "NO_UNASKED_ADVICE_EMOTIONAL", "DEFAULT_PROSE", "MAX_LEN_600"], "notes": "Full constraint activation. Do NOT respond defensively — acknowledge the friction source." },
+    { "id": "L3-002", "level": 3, "severity": 0.85, "type": "verbal", "marker": "profanity_directed", "patterns": { "nl": ["fuck", "kut", "godverdomme", "klote", "wat een zooi", "rot op"], "en": ["fuck", "shit", "damn", "what the hell", "screw this", "piss off"] }, "detection": "pattern", "contexts": ["emotional", "technical", "neutral"], "suggestedConstraints": ["BAN_CLICHE_PHRASES", "NO_HELPDESK", "NO_UNASKED_ADVICE_EMOTIONAL", "DEFAULT_PROSE", "MAX_LEN_600", "NO_REPETITION"], "notes": "Maximum constraint set. LIWC anger category + Grievance Dictionary hate/frustration overlap." },
+    { "id": "L3-003", "level": 3, "severity": 0.90, "type": "verbal", "marker": "termination_demand", "patterns": { "nl": ["ik stop ermee", "ik wil niet meer praten", "ga weg", "laat me met rust"], "en": ["i'm done", "i don't want to talk anymore", "go away", "leave me alone"] }, "detection": "pattern", "contexts": ["emotional"], "suggestedConstraints": ["BAN_CLICHE_PHRASES", "NO_HELPDESK", "NO_UNASKED_ADVICE_EMOTIONAL", "DEFAULT_PROSE", "MAX_LEN_600", "NO_REPETITION"], "notes": "COLING-2025: user disengagement is endpoint of frustration trajectory. Minimal response, no persuasion." },
+    { "id": "AGENT-001", "level": 0, "severity": 0.0, "type": "agent_trigger", "marker": "agent_cliche_empathy", "patterns": { "nl": ["ik hoor je", "ik begrijp het", "ik ben er voor je", "je staat er niet alleen voor", "goed dat je dit deelt"], "en": ["i hear you", "i understand", "i am here for you", "you are not alone", "thank you for sharing"] }, "detection": "pattern", "contexts": ["emotional"], "suggestedConstraints": ["BAN_CLICHE_PHRASES"], "notes": "Agent-output patterns that CAUSE irritation." },
+    { "id": "AGENT-002", "level": 0, "severity": 0.0, "type": "agent_trigger", "marker": "agent_helpdesk_filler", "patterns": { "nl": ["wil je dat ik", "laat maar weten", "ik kan voor je", "zal ik dat voor je", "goeie vraag", "zeker weten"], "en": ["would you like me to", "let me know", "i can help you with", "shall i", "great question", "absolutely"] }, "detection": "pattern", "contexts": ["emotional", "technical", "neutral"], "suggestedConstraints": ["NO_HELPDESK"], "notes": "Agent-side helpdesk patterns. Must be filtered in enforceBeforeSend." },
+    { "id": "AGENT-003", "level": 0, "severity": 0.0, "type": "agent_trigger", "marker": "agent_premature_structure", "patterns": { "nl": ["stap 1", "stap 2", "ten eerste", "ten tweede", "plan:", "aanpak:"], "en": ["step 1", "step 2", "first,", "second,", "plan:", "approach:"] }, "detection": "pattern", "contexts": ["emotional"], "suggestedConstraints": ["NO_UNASKED_ADVICE_EMOTIONAL", "DEFAULT_PROSE"], "notes": "Structured output in emotional context = premature advice." },
     {
-      "id": "L1-001",
-      "level": 1,
-      "severity": 0.15,
-      "type": "structural",
-      "marker": "message_shortening",
-      "description": "Abrupt reduction in message length compared to user baseline (>50% shorter)",
-      "detection": "computed",
-      "languages": ["*"],
-      "contexts": ["emotional", "technical", "neutral"],
-      "suggestedConstraints": [],
-      "notes": "Signature update only; no active constraint. Indicates possible disengagement or impatience."
-    },
-    {
-      "id": "L1-002",
-      "level": 1,
-      "severity": 0.18,
-      "type": "structural",
-      "marker": "greeting_dropout",
-      "description": "Disappearance of greeting/closing phrases present in earlier turns",
-      "detection": "computed",
-      "languages": ["*"],
-      "contexts": ["emotional", "neutral"],
-      "suggestedConstraints": [],
-      "notes": "Pragmatic withdrawal. Correlates with reduced relational investment (CAT theory)."
-    },
-    {
-      "id": "L1-003",
-      "level": 1,
-      "severity": 0.20,
-      "type": "structural",
-      "marker": "question_repetition",
-      "description": "User rephrases the same question or request a second time",
-      "detection": "semantic_similarity",
-      "languages": ["*"],
-      "contexts": ["emotional", "technical", "neutral"],
-      "suggestedConstraints": [],
-      "notes": "COLING-2025: repetition of requests is primary frustration marker in task-oriented dialog."
-    },
-    {
-      "id": "L1-004",
-      "level": 1,
-      "severity": 0.22,
-      "type": "structural",
-      "marker": "response_latency_drop",
-      "description": "User responds much faster than baseline (rapid-fire corrections)",
-      "detection": "computed",
-      "languages": ["*"],
-      "contexts": ["emotional", "technical"],
-      "suggestedConstraints": [],
-      "notes": "Temporal marker. Requires timestamp tracking per turn."
-    },
-
-    {
-      "id": "L2-001",
-      "level": 2,
-      "severity": 0.40,
-      "type": "verbal",
-      "marker": "explicit_negation",
-      "patterns": {
-        "nl": ["nee,? dat bedoel ik niet", "nee,? dat is niet", "dat klopt niet", "dat zeg ik niet", "niet wat ik vraag", "dat is niet de bedoeling"],
-        "en": ["no,? that's not what i", "that's not right", "that's not what i asked", "you're missing the point", "not what i meant"]
-      },
-      "detection": "pattern",
-      "contexts": ["emotional", "technical", "neutral"],
-      "suggestedConstraints": ["NO_HELPDESK"],
-      "notes": "COLING-2025: negation is second-strongest frustration predictor after repetition."
-    },
-    {
-      "id": "L2-002",
-      "level": 2,
-      "severity": 0.45,
-      "type": "verbal",
-      "marker": "explicit_correction",
-      "patterns": {
-        "nl": ["dat zei ik al", "dat heb ik al gezegd", "ik zei toch", "zoals ik al zei", "heb ik net uitgelegd", "je herhaalt"],
-        "en": ["i already said", "i just told you", "as i said", "i already explained", "you're repeating"]
-      },
-      "detection": "pattern",
-      "contexts": ["emotional", "technical", "neutral"],
-      "suggestedConstraints": ["NO_REPETITION", "NO_HELPDESK"],
-      "notes": "Direct signal that agent has failed to register prior input. High diagnostic value."
-    },
-    {
-      "id": "L2-003",
-      "level": 2,
-      "severity": 0.50,
-      "type": "verbal",
-      "marker": "imperative_command",
-      "patterns": {
-        "nl": ["stop", "luister", "lees wat ik schrijf", "doe het gewoon", "hou op", "niet doen", "laat dat"],
-        "en": ["stop", "listen", "just do it", "read what i wrote", "cut it out", "don't do that", "enough"]
-      },
-      "detection": "pattern",
-      "contexts": ["emotional", "technical"],
-      "suggestedConstraints": ["NO_HELPDESK", "MAX_LEN_600", "NO_UNASKED_ADVICE_EMOTIONAL"],
-      "notes": "Garriga et al.: imperative language and volume increase precede agitation escalation."
-    },
-    {
-      "id": "L2-004",
-      "level": 2,
-      "severity": 0.50,
-      "type": "verbal",
-      "marker": "sarcasm_dismissal",
-      "patterns": {
-        "nl": ["ja hoor", "oh wat fijn", "geweldig", "briljant", "heel nuttig", "dank je wel hè"],
-        "en": ["oh great", "how helpful", "brilliant", "yeah sure", "thanks a lot", "wow really"]
-      },
-      "detection": "pattern_plus_context",
-      "contexts": ["emotional", "neutral"],
-      "suggestedConstraints": ["BAN_CLICHE_PHRASES", "NO_HELPDESK"],
-      "notes": "Sarcasm inverts polarity. Requires context awareness — same phrases can be genuine. Flag for LLM-based disambiguation."
-    },
-    {
-      "id": "L2-005",
-      "level": 2,
-      "severity": 0.55,
-      "type": "verbal",
-      "marker": "exasperation_expression",
-      "patterns": {
-        "nl": ["ik word gek", "ik kan er niet meer tegen", "dit werkt niet", "dit slaat nergens op", "het lukt gewoon niet", "ik geef het op"],
-        "en": ["i can't take this", "this doesn't work", "this makes no sense", "i'm losing it", "i give up", "this is pointless"]
-      },
-      "detection": "pattern",
-      "contexts": ["emotional", "technical"],
-      "suggestedConstraints": ["NO_UNASKED_ADVICE_EMOTIONAL", "NO_HELPDESK", "MAX_LEN_600"],
-      "notes": "LIWC negative emotion + Grievance Dictionary frustration category. Medium-high severity."
-    },
-    {
-      "id": "L2-006",
-      "level": 2,
-      "severity": 0.45,
-      "type": "verbal",
-      "marker": "disengagement_threat",
-      "patterns": {
-        "nl": ["laat maar", "vergeet het", "ik doe het zelf wel", "maakt niet uit"],
-        "en": ["forget it", "never mind", "i'll do it myself", "whatever", "doesn't matter"]
-      },
-      "detection": "pattern",
-      "contexts": ["emotional", "technical", "neutral"],
-      "suggestedConstraints": ["NO_HELPDESK"],
-      "notes": "COLING-2025: disengagement signals are late-stage frustration markers. Often follows unresolved repetition."
-    },
-
-    {
-      "id": "L3-001",
-      "level": 3,
-      "severity": 0.75,
-      "type": "verbal",
-      "marker": "hostile_label",
-      "patterns": {
-        "nl": ["debiel", "idioot", "nutteloos", "waardeloos", "onbruikbaar", "dom", "stom", "achterlijk"],
-        "en": ["idiot", "useless", "worthless", "stupid", "dumb", "pathetic", "trash", "garbage"]
-      },
-      "detection": "pattern",
-      "contexts": ["emotional", "technical", "neutral"],
-      "suggestedConstraints": ["BAN_CLICHE_PHRASES", "NO_HELPDESK", "NO_UNASKED_ADVICE_EMOTIONAL", "DEFAULT_PROSE", "MAX_LEN_600"],
-      "notes": "Full constraint activation. Log interaction for reflection. Do NOT respond defensively or apologetically — acknowledge the friction source."
-    },
-    {
-      "id": "L3-002",
-      "level": 3,
-      "severity": 0.85,
-      "type": "verbal",
-      "marker": "profanity_directed",
-      "patterns": {
-        "nl": ["fuck", "kut", "godverdomme", "klote", "wat een zooi", "rot op"],
-        "en": ["fuck", "shit", "damn", "what the hell", "screw this", "piss off"]
-      },
-      "detection": "pattern",
-      "contexts": ["emotional", "technical", "neutral"],
-      "suggestedConstraints": ["BAN_CLICHE_PHRASES", "NO_HELPDESK", "NO_UNASKED_ADVICE_EMOTIONAL", "DEFAULT_PROSE", "MAX_LEN_600", "NO_REPETITION"],
-      "notes": "Maximum constraint set. LIWC anger category + Grievance Dictionary hate/frustration overlap."
-    },
-    {
-      "id": "L3-003",
-      "level": 3,
-      "severity": 0.90,
-      "type": "verbal",
-      "marker": "termination_demand",
-      "patterns": {
-        "nl": ["ik stop ermee", "ik wil niet meer praten", "ga weg", "laat me met rust"],
-        "en": ["i'm done", "i don't want to talk anymore", "go away", "leave me alone"]
-      },
-      "detection": "pattern",
-      "contexts": ["emotional"],
-      "suggestedConstraints": ["BAN_CLICHE_PHRASES", "NO_HELPDESK", "NO_UNASKED_ADVICE_EMOTIONAL", "DEFAULT_PROSE", "MAX_LEN_600", "NO_REPETITION"],
-      "notes": "COLING-2025: user disengagement or desire to stop interaction is endpoint of frustration trajectory. Requires minimal response, no persuasion to continue."
-    },
-
-    {
-      "id": "AGENT-001",
+      "id": "AGENT-004",
       "level": 0,
       "severity": 0.0,
       "type": "agent_trigger",
-      "marker": "agent_cliche_empathy",
-      "patterns": {
-        "nl": ["ik hoor je", "ik begrijp het", "ik ben er voor je", "je staat er niet alleen voor", "goed dat je dit deelt"],
-        "en": ["i hear you", "i understand", "i am here for you", "you are not alone", "thank you for sharing"]
-      },
-      "detection": "pattern",
-      "contexts": ["emotional"],
-      "suggestedConstraints": ["BAN_CLICHE_PHRASES"],
-      "notes": "These are agent-output patterns that CAUSE irritation. Tracked separately: when detected in draft, signature cliche_empathy increments."
-    },
-    {
-      "id": "AGENT-002",
-      "level": 0,
-      "severity": 0.0,
-      "type": "agent_trigger",
-      "marker": "agent_helpdesk_filler",
-      "patterns": {
-        "nl": ["wil je dat ik", "laat maar weten", "ik kan voor je", "zal ik dat voor je", "goeie vraag", "zeker weten"],
-        "en": ["would you like me to", "let me know", "i can help you with", "shall i", "great question", "absolutely"]
-      },
-      "detection": "pattern",
+      "marker": "confirm_without_deliver",
+      "description": "Agent acknowledges problem or confirms intent to act but produces no tool call, code execution, or concrete result within the same turn. Detected over 2+ consecutive turns.",
+      "detection": "computed",
+      "languages": ["*"],
       "contexts": ["emotional", "technical", "neutral"],
-      "suggestedConstraints": ["NO_HELPDESK"],
-      "notes": "Agent-side helpdesk patterns. High frequency in Rutka's current output. Must be filtered in enforceBeforeSend."
+      "suggestedConstraints": ["EXECUTE_FIRST"],
+      "notes": "Behavioral pattern, not linguistic. Requires turn history with tool-call tracking. Triggers when agent turn contains acknowledgment verbs (klopt, snap, helder, begrijp, genoteerd, ik pak, ik fix, ik check, ik draai / got it, understood, on it, fixing, checking, running) but the turn transcript shows zero tool_use blocks. Counter resets on any turn with actual tool execution or concrete output."
     },
     {
-      "id": "AGENT-003",
+      "id": "AGENT-005",
       "level": 0,
       "severity": 0.0,
       "type": "agent_trigger",
-      "marker": "agent_premature_structure",
-      "patterns": {
-        "nl": ["stap 1", "stap 2", "ten eerste", "ten tweede", "plan:", "aanpak:"],
-        "en": ["step 1", "step 2", "first,", "second,", "plan:", "approach:"]
-      },
-      "detection": "pattern",
-      "contexts": ["emotional"],
-      "suggestedConstraints": ["NO_UNASKED_ADVICE_EMOTIONAL", "DEFAULT_PROSE"],
-      "notes": "Structured output in emotional context = premature advice. Only problematic when askedForAdvice is false."
+      "marker": "escalation_without_pivot",
+      "description": "User friction level has reached L2+ but agent has not changed strategy (same approach repeated, no new tool calls, no shortened response). Cross-signal combining user-side escalation with agent-side stagnation.",
+      "detection": "computed",
+      "languages": ["*"],
+      "contexts": ["emotional", "technical"],
+      "suggestedConstraints": ["EXECUTE_FIRST"],
+      "notes": "Compound trigger: when BOTH user irritation >= L2 AND confirm_without_deliver count >= 2, EXECUTE_FIRST constraint activates as hard override. Agent must: (1) stop explaining, (2) execute the shortest path to the requested result, (3) report result only."
     }
   ]
 }

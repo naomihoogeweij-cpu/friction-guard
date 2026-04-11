@@ -11,7 +11,8 @@ export type Signature =
   | "bullet_mismatch"
   | "over_explain"
   | "repetition"
-  | "helpdesk_tone";
+  | "helpdesk_tone"
+  | "confirm_without_deliver";
 
 export type Constraint =
   | "BAN_CLICHE_PHRASES"
@@ -19,7 +20,8 @@ export type Constraint =
   | "DEFAULT_PROSE"
   | "MAX_LEN_600"
   | "NO_HELPDESK"
-  | "NO_REPETITION";
+  | "NO_REPETITION"
+  | "EXECUTE_FIRST";
 
 export type FrictionLevel = 0 | 1 | 2 | 3;
 
@@ -153,6 +155,7 @@ export function defaultProfile(userId: string): UserProfile {
       over_explain: 0,
       repetition: 0,
       helpdesk_tone: 0,
+      confirm_without_deliver: 0,
     },
     constraints: [],
     bannedPhrases: [],
@@ -204,6 +207,7 @@ const CONSTRAINT_THRESHOLDS: Record<Signature, { constraint: Constraint; thresho
   over_explain: { constraint: "MAX_LEN_600", threshold: 0.7 },
   helpdesk_tone: { constraint: "NO_HELPDESK", threshold: 0.6 },
   repetition: { constraint: "NO_REPETITION", threshold: 0.6 },
+  confirm_without_deliver: { constraint: "EXECUTE_FIRST", threshold: 0.5 },
 };
 
 export function inferConstraints(profile: UserProfile) {

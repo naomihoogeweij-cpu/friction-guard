@@ -1,6 +1,6 @@
 // ──────────────────────────────────────────────
 // friction-guard — OpenClaw plugin
-// v4.0.0
+// v4.1.0
 //
 // Evidence-based interaction friction detection
 // and pre-generation constraint injection.
@@ -22,12 +22,17 @@ import { loadAgentIrritationRegistry, matchAgentIrritation, agentIrritationConst
 import { getPromotedBans, runClassification, getClassifierStats } from "../../workspace/interaction/agent-irritation-classifier";
 import { runPatternMining, getMinedPatterns } from "../../workspace/interaction/agent-pattern-miner";
 import { loadPrimingExamples, buildColdStartPrompt, isColdStart } from "../../workspace/interaction/cold-start-priming";
+import {
+  createExecuteFirstState, processTurn, getExecuteFirstPrompt,
+  updateProfileSignature, isConfirmWithoutDeliver,
+  type TurnRecord, type ExecuteFirstState,
+} from "../../workspace/interaction/friction-execute-first";
 
 import { appendFileSync, mkdirSync, readFileSync, existsSync, openSync, fstatSync, readSync, closeSync } from "node:fs";
 import { exec } from "node:child_process";
 import { join, dirname } from "node:path";
 
-// --- Action avoidance detection ---
+// --- Action avoidance detection (v4.0 legacy, kept as fallback) ---
 const ACTION_AVOIDANCE_PATTERNS_NL = [
   "ja, dat had ik moeten doen", "klopt, dat ga ik nu", "dat is helder", "goed punt, ik ga",
   "je hebt gelijk, ik moet", "ik ga dat nu nalopen", "eens, dat had niet", "inderdaad, dat moet",
@@ -114,6 +119,26 @@ const BASELINE_WINDOW = 10;
 const SIGNATURE_INCREMENT: Record<number, number> = { 0: 0, 1: 0.03, 2: 0.08, 3: 0.15 };
 let _lastBackgroundRun = 0;
 let _lastClassifierRun = 0;
+
+// ── EXECUTE_FIRST state per user (v4.1) ──
+const _executeFirstStates: Map<string, ExecuteFirstState> = new Map();
+function getOrCreateEFState(userId: string): ExecuteFirstState {
+  let s = _executeFirstStates.get(userId);
+  if (!s) { s = createExecuteFirstState(); _executeFirstStates.set(userId, s); }
+  return s;
+}
+
+function lastAgentHadToolCall(messages: any[]): boolean {
+  if (!messages || !Array.isArray(messages)) return false;
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const msg = messages[i];
+    if (msg.role === "assistant") {
+      if (Array.isArray(msg.content)) return msg.content.some((p: any) => p.type === "tool_use" || p.type === "tool_call");
+      return false;
+    }
+  }
+  return false;
+}
 
 function detectLanguage(text: string, defaultLang: string = "en"): "nl" | "en" {
   const nlMarkers = /\b(ik|je|het|een|dat|niet|maar|ook|wel|nog|van|voor|naar|dit|wat)\b/gi;
@@ -208,6 +233,7 @@ function buildConstraintPrompt(profile: UserProfile): string {
   if (ids.has("DEFAULT_PROSE")) rules.push("Write in prose paragraphs. No bullet points or numbered lists unless the user explicitly asks.");
   if (ids.has("MAX_LEN_600")) rules.push(`Keep your response under ${MAX_RESPONSE_LENGTH} characters.`);
   if (ids.has("NO_REPETITION")) rules.push("Do not repeat sentences, phrases, or ideas from previous messages.");
+  if (ids.has("EXECUTE_FIRST")) rules.push("⚠️ EXECUTE_FIRST OVERRIDE: You have confirmed intent without delivering results multiple times while the user escalated. STOP explaining. STOP giving status updates. Execute the shortest path to the result NOW. Report ONLY the result. If it fails, report the failure and your next concrete action — no explanations.");
   if (ids.has("EXECUTE_NOW")) rules.push("ACTION AVOIDANCE DETECTED. You are acknowledging tasks without executing them. Do NOT explain what you should do. Do NOT confirm you understand. EXECUTE the action in this turn and report what you did. If the action requires a tool call, file write, or command: do it NOW, not next turn.");
   return "\n\n[INTERACTION CONSTRAINTS — learned from this user's preferences]\n" + rules.map((r, i) => `${i + 1}. ${r}`).join("\n") + "\n[END CONSTRAINTS]\n";
 }
@@ -265,7 +291,7 @@ export default {
     if (config.backgroundIntervalMinutes) BACKGROUND_INTERVAL_MS = config.backgroundIntervalMinutes * 60 * 1000;
     configurePaths(config);
     const defaultLang = config.defaultLanguage || "en";
-    logger.info("[friction-guard] v4.0.0 — pre-generation constraint injection");
+    logger.info("[friction-guard] v4.1.0 — pre-generation constraint injection");
     try { const entries = loadEvidence(); logger.info(`[friction-guard] Evidence registry: ${entries.length} entries loaded`); loadGrievanceDictionary(); loadAgentIrritationRegistry(); loadPrimingExamples(); } catch (e) { logger.warn("[friction-guard] Could not load evidence registry:", e); logErrorToFile("tool_fail", "[friction-guard] evidence registry load failed: " + String(e)); }
 
     api.on("before_prompt_build", (event: any, ctx: any) => {
@@ -282,7 +308,29 @@ export default {
           recordTurn(userId, "user", userText);
           const assessment = assessFriction(userText, profile, lang);
           if (assessment.level < 2) { const repetition = detectUserForcedRepetition(userText, userId); if (repetition.detected) { profile.signatures.repetition = clamp01(profile.signatures.repetition + 0.10); logFragment(userId, "user", userText.slice(0, 300), 2 as FrictionLevel, ["USER-FORCED-REPEAT"], 0, ["NO_REPETITION"], { repetition: 0.10 }); } }
-          if (detectActionAvoidanceLoop(userId, lang)) { const execConstraint = profile.constraints.find((c) => c.id === "EXECUTE_NOW"); if (execConstraint) { execConstraint.enabled = true; execConstraint.lastTriggered = new Date().toISOString(); } else { profile.constraints.push({ id: "EXECUTE_NOW", enabled: true, confidence: 0.9, lastTriggered: new Date().toISOString() }); } logFragment(userId, "agent", "[action-avoidance-loop]", 2 as FrictionLevel, ["ACTION-AVOIDANCE"], 0, ["EXECUTE_NOW"], { helpdesk: 0.15 }); }
+          if (detectActionAvoidanceLoop(userId, lang)) { const execConstraint = profile.constraints.find((c) => c.id === "EXECUTE_NOW"); if (execConstraint) { execConstraint.enabled = true; execConstraint.lastTriggered = new Date().toISOString(); } else { profile.constraints.push({ id: "EXECUTE_NOW" as any, enabled: true, confidence: 0.9, lastTriggered: new Date().toISOString() }); } logFragment(userId, "agent", "[action-avoidance-loop]", 2 as FrictionLevel, ["ACTION-AVOIDANCE"], 0, ["EXECUTE_NOW" as any], { helpdesk: 0.15 }); }
+
+          // ── EXECUTE_FIRST state machine (v4.1) ──
+          const efState = getOrCreateEFState(userId);
+          const hadToolCall = lastAgentHadToolCall(messages);
+          if (agentText) {
+            const agentTurn: TurnRecord = { role: "assistant", text: agentText, hasToolCall: hadToolCall, hasResult: hadToolCall };
+            const updated = processTurn(efState, agentTurn);
+            _executeFirstStates.set(userId, updated);
+          }
+          {
+            const userTurn: TurnRecord = { role: "user", text: userText, frictionLevel: assessment.level };
+            const updated = processTurn(getOrCreateEFState(userId), userTurn);
+            _executeFirstStates.set(userId, updated);
+            if (updated.active) {
+              const efConstraint = profile.constraints.find((c) => c.id === "EXECUTE_FIRST");
+              if (efConstraint) { efConstraint.enabled = true; efConstraint.lastTriggered = new Date().toISOString(); }
+              else { profile.constraints.push({ id: "EXECUTE_FIRST", enabled: true, confidence: 0.95, lastTriggered: new Date().toISOString() }); }
+              logFragment(userId, "agent", "[confirm-without-deliver]", 2 as FrictionLevel, ["AGENT-004", "AGENT-005"], 0, ["EXECUTE_FIRST"], { confirm_without_deliver: 0.15 });
+            }
+            updateProfileSignature(profile, updated);
+          }
+
           for (const [sig, inc] of Object.entries(assessment.signatureUpdates)) profile.signatures[sig as Signature] = clamp01(profile.signatures[sig as Signature] + (inc as number));
           for (const constraint of assessment.constraintsToActivate) { const existing = profile.constraints.find((c) => c.id === constraint); if (existing) { existing.enabled = true; existing.lastTriggered = new Date().toISOString(); } else { profile.constraints.push({ id: constraint, enabled: true, confidence: 0.65, lastTriggered: new Date().toISOString() }); } }
           if (assessment.level > 0) logFragment(userId, "user", userText.slice(0, 300), assessment.level, assessment.matchedEntries.map((e) => e.id), assessment.baselineDeviation, assessment.constraintsToActivate, assessment.signatureUpdates);

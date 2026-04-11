@@ -1,4 +1,4 @@
-# friction-guard v4.0.0
+# friction-guard v4.1.0
 ## Functional and Technical Description
 
 ---
@@ -307,6 +307,43 @@ van der Vegt, I., et al. (2021). *Behavior Research Methods, 53*, 2105–2119.
 Weiler, S., et al. (2023). *Electronic Markets, 33*, Article 51.
 Zheng, Y., et al. (2024). *IT & People, 37*(8), 175–199.
 
+## v4.1.0 — Behavioral pattern detection: EXECUTE_FIRST
+
+### The gap
+
+v4.0 detected what the agent *says* but not what the agent *does*. When an agent confirms intent ("Klopt, ik pak dat nu", "Ik ga het fixen") without producing any tool call or concrete result — and repeats this across multiple turns while the user escalates — friction-guard stayed silent because the language was linguistically clean. The user had to escalate from imperatives to caps to profanity before anything changed.
+
+### New module: `friction-execute-first.ts`
+
+A turn-by-turn state machine that tracks agent delivery vs. confirmation:
+
+- **`isConfirmWithoutDeliver()`**: detects NL/EN confirmation language in agent turns that contain zero `tool_use` blocks
+- **`processTurn()`**: maintains per-user `ExecuteFirstState` across the conversation
+- **Compound trigger**: `confirmWithoutDeliverCount >= 2` AND `userEscalationPeak >= L2` → activates `EXECUTE_FIRST`
+- **Reset**: any agent turn with actual tool execution resets the counter
+
+### New constraint: EXECUTE_FIRST
+
+Hard override injected into the system prompt when the compound trigger fires. Rules: stop explaining, stop giving status updates, execute the shortest path to the result, report only the result. Stays active until the agent produces a concrete result.
+
+### New evidence entries
+
+- **AGENT-004** (`confirm_without_deliver`): behavioral pattern requiring turn history with tool-call tracking
+- **AGENT-005** (`escalation_without_pivot`): compound trigger combining user L2+ escalation with agent stagnation
+
+### Relationship to EXECUTE_NOW (v3.5)
+
+`EXECUTE_NOW` uses string-matching on agent output to detect acknowledgment-without-action phrases. It remains as a fallback. `EXECUTE_FIRST` is the more robust layer: it inspects actual `tool_use` blocks in the message history, making it immune to the agent rephrasing its confirmations.
+
+### File inventory (v4.1.0)
+
+| File | Role |
+|------|------|
+| `friction-execute-first.ts` | NEW — behavioral state machine |
+| `friction-policy.ts` | Core types, profiles, constraint inference (updated: new signature + constraint) |
+| `friction-evidence.json` | Evidence registry v4.1.0 — 18 entries (13 user + 5 agent) |
+| `index.ts` | Plugin entry point (updated: EXECUTE_FIRST integration in before_prompt_build) |
+
 ---
 
-*friction-guard v4.0.0 — Naomi Hoogeweij, Rutka, and Claude Opus. April 2026.*
+*friction-guard v4.1.0 — Naomi Hoogeweij, Rutka, and Claude Opus. April 2026.*

@@ -1,4 +1,4 @@
-# friction-guard v4.0.0
+# friction-guard v4.1.0
 ## Functionele en technische beschrijving
 
 ---
@@ -216,6 +216,43 @@ Van der Vegt, I., et al. (2021). *Behavior Research Methods, 53*, 2105–2119.
 Weiler, S., et al. (2023). *Electronic Markets, 33*, Article 51.
 Zheng, Y., et al. (2024). *IT & People, 37*(8), 175–199.
 
+## v4.1.0 — Gedragspatroondetectie: EXECUTE_FIRST
+
+### Het gat
+
+v4.0 detecteerde wat de agent *zegt*, maar niet wat de agent *doet*. Wanneer een agent bevestigt dat hij iets gaat doen (“Klopt, ik pak dat nu”, “Ik ga het fixen”) zonder daadwerkelijk een tool-call of concreet resultaat te produceren — en dit herhaalt over meerdere beurten terwijl de gebruiker escaleert — bleef friction-guard stil. De taal was immers linguïstisch schoon.
+
+### Nieuwe module: `friction-execute-first.ts`
+
+Een beurt-voor-beurt state machine die agent-levering versus bevestiging bijhoudt:
+
+- **`isConfirmWithoutDeliver()`**: detecteert NL/EN bevestigingstaal in agentbeurten zonder `tool_use` blocks
+- **`processTurn()`**: onderhoudt per-gebruiker `ExecuteFirstState` gedurende het gesprek
+- **Compound trigger**: `confirmWithoutDeliverCount >= 2` EN `userEscalationPeak >= L2` → activeert `EXECUTE_FIRST`
+- **Reset**: elke agentbeurt met daadwerkelijke tool-uitvoering reset de teller
+
+### Nieuwe constraint: EXECUTE_FIRST
+
+Harde override geïnjecteerd in de system prompt wanneer de compound trigger afgaat. Regels: stop met uitleggen, stop met statusupdates, voer het kortste pad naar het resultaat uit, rapporteer alleen het resultaat.
+
+### Nieuwe evidence entries
+
+- **AGENT-004** (`confirm_without_deliver`): gedragspatroon met tool-call tracking over beurten
+- **AGENT-005** (`escalation_without_pivot`): compound trigger die user L2+ escalatie combineert met agent-stagnatie
+
+### Relatie tot EXECUTE_NOW (v3.5)
+
+`EXECUTE_NOW` gebruikt string-matching op agentoutput. Het blijft bestaan als fallback. `EXECUTE_FIRST` is de robuustere laag: het inspecteert daadwerkelijke `tool_use` blocks in de berichtengeschiedenis.
+
+### Bestandsoverzicht (v4.1.0)
+
+| Bestand | Rol |
+|---------|-----|
+| `friction-execute-first.ts` | NIEUW — gedragsstatemachine |
+| `friction-policy.ts` | Kerntypes, profielen, constraint-inferentie (bijgewerkt) |
+| `friction-evidence.json` | Evidence registry v4.1.0 — 18 entries (13 user + 5 agent) |
+| `index.ts` | Plugin entry point (bijgewerkt met EXECUTE_FIRST integratie) |
+
 ---
 
-*friction-guard v4.0.0 — Naomi Hoogeweij, Rutka en Claude Opus. April 2026.*
+*friction-guard v4.1.0 — Naomi Hoogeweij, Rutka en Claude Opus. April 2026.*
