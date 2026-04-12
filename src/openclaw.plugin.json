@@ -1,8 +1,8 @@
 {
   "name": "friction-guard",
   "id": "friction-guard",
-  "version": "4.0.0",
-  "description": "Evidence-based interaction friction detection and pre-generation constraint enforcement. Learns relational mismatch patterns, uses semantic search for ban expansion, and adjusts agent behaviour per person.",
+  "version": "4.2.0",
+  "description": "Evidence-based interaction friction detection and pre-generation constraint enforcement. Learns relational mismatch patterns and adjusts agent behaviour per person.",
   "entry": "index.ts",
   "configSchema": {},
   "activation": {

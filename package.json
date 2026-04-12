@@ -1,19 +1,52 @@
 {
   "name": "openclaw-friction-guard",
-  "version": "4.0.0",
+  "version": "4.2.0",
   "description": "Evidence-based interaction friction detection and constraint enforcement for OpenClaw agents. Learns relational mismatch patterns, uses semantic search for ban expansion, and injects pre-generation constraints to improve agent communication quality.",
   "keywords": [
-    "openclaw", "plugin", "friction", "interaction-quality", "nlp",
-    "agent-behavior", "constraint-enforcement", "mental-health",
-    "conversational-ai", "semantic-search", "vector-embeddings"
+    "openclaw",
+    "plugin",
+    "friction",
+    "interaction-quality",
+    "nlp",
+    "agent-behavior",
+    "constraint-enforcement",
+    "mental-health",
+    "conversational-ai",
+    "semantic-search",
+    "vector-embeddings"
   ],
-  "author": { "name": "Naomi Hoogeweij", "url": "https://rutka-ai.tech" },
-  "contributors": [{ "name": "Rutka AI", "url": "https://rutka-ai.tech" }],
+  "author": {
+    "name": "Naomi Hoogeweij",
+    "url": "https://rutka-ai.tech"
+  },
+  "contributors": [
+    {
+      "name": "Rutka AI",
+      "url": "https://rutka-ai.tech"
+    }
+  ],
   "license": "MIT",
-  "repository": { "type": "git", "url": "https://github.com/naomihoogeweij-cpu/friction-guard" },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/naomihoogeweij-cpu/friction-guard"
+  },
   "homepage": "https://github.com/naomihoogeweij-cpu/friction-guard#readme",
-  "bugs": { "url": "https://github.com/naomihoogeweij-cpu/friction-guard/issues" },
-  "openclaw": { "extensions": ["src/index.ts"] },
-  "files": ["src/", "docs/", "README.md", "LICENSE", "CHANGELOG.md"],
-  "engines": { "node": ">=22" }
+  "bugs": {
+    "url": "https://github.com/naomihoogeweij-cpu/friction-guard/issues"
+  },
+  "openclaw": {
+    "extensions": [
+      "src/index.ts"
+    ]
+  },
+  "files": [
+    "src/",
+    "docs/",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "engines": {
+    "node": ">=22"
+  }
 }

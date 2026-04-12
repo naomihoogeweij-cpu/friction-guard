@@ -1,5 +1,19 @@
 # Changelog
 
+## 4.2.0 (2026-04-12)
+
+### Dissatisfaction category in Grievance Dictionary
+
+Added custom category `dissatisfaction` (34 NL / 11 EN stems) for everyday displeasure and implicit criticism. Covers colloquial Dutch words ("meuk", "rommel", "troep", "puinhoop", "rotzooi", "bagger") and implicit-criticism phrases ("weer vol", "niks gebeurd", "niet gedaan", "waarom heb je niet", "schiet niet op"). Maps to signature `confirm_without_deliver`, triggers constraint `EXECUTE_FIRST`. Grievance Dictionary now v1.1.0: 590 NL / 475 EN stems.
+
+### System context stripping
+
+`stripChannelMetadata()` now removes five types of system-injected context before the analysis pipeline: Bootstrap truncation warnings (caused false-positive L3 scores via Grievance Dictionary), `System (untrusted):` exec result blocks, Pre-compaction memory flush blocks, Inter-session message headers, Queued-messages wrappers.
+
+### Self-inspection tooling
+
+Added `scripts/friction_guard_inspect.py` with `summary` as primary command. Outputs pre-interpreted, relay-ready summary in Dutch. Design principle: the agent relays output without interpretation, preventing misrepresentation of data. Additional commands: `status`, `incidents`, `profile`, `explain`.
+
 ## 4.1.0 (2026-04-11)
 
 ### EXECUTE_FIRST: behavioral pattern detection for confirm-without-deliver loops

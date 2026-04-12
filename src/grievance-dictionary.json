@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "Friction-relevant categories from the Grievance Dictionary (van der Vegt et al., 2021), Dutch and English",
     "source": "https://github.com/Isabellevdv/grievancedictionary",
     "license": "CC BY 4.0",
@@ -8,10 +8,11 @@
       "frustration",
       "desperation",
       "grievance",
-      "hate"
+      "hate",
+      "dissatisfaction"
     ],
-    "total_nl": 556,
-    "total_en": 464,
+    "total_nl": 590,
+    "total_en": 475,
     "rating_scale": "7-10 (goodness-of-fit to category, 7+ threshold from original paper)",
     "severity_mapping": "rating 7-8 → severity 0.3-0.5, 8-9 → 0.5-0.7, 9-10 → 0.7-0.9"
   },
@@ -4151,6 +4152,201 @@
           {
             "stem": "scath",
             "severity": 0.31
+          }
+        ]
+      }
+    },
+    "dissatisfaction": {
+      "frictionLevel": 2,
+      "suggestedConstraints": [
+        "NO_HELPDESK",
+        "NO_UNASKED_ADVICE_EMOTIONAL",
+        "EXECUTE_FIRST"
+      ],
+      "primarySignature": "confirm_without_deliver",
+      "words": {
+        "nl": [
+          {
+            "stem": "meuk",
+            "severity": 0.65
+          },
+          {
+            "stem": "rommel",
+            "severity": 0.6
+          },
+          {
+            "stem": "troep",
+            "severity": 0.65
+          },
+          {
+            "stem": "bende",
+            "severity": 0.6
+          },
+          {
+            "stem": "puinhoop",
+            "severity": 0.7
+          },
+          {
+            "stem": "rommeltj",
+            "severity": 0.55
+          },
+          {
+            "stem": "bagger",
+            "severity": 0.65
+          },
+          {
+            "stem": "prut",
+            "severity": 0.55
+          },
+          {
+            "stem": "rotzooi",
+            "severity": 0.7
+          },
+          {
+            "stem": "janboel",
+            "severity": 0.6
+          },
+          {
+            "stem": "zootj",
+            "severity": 0.65
+          },
+          {
+            "stem": "weer vol",
+            "severity": 0.6
+          },
+          {
+            "stem": "nog steeds niet",
+            "severity": 0.7
+          },
+          {
+            "stem": "niks gebeurd",
+            "severity": 0.7
+          },
+          {
+            "stem": "niets gebeurd",
+            "severity": 0.7
+          },
+          {
+            "stem": "niet gedaan",
+            "severity": 0.65
+          },
+          {
+            "stem": "waarom is dit niet",
+            "severity": 0.65
+          },
+          {
+            "stem": "waarom heb je niet",
+            "severity": 0.65
+          },
+          {
+            "stem": "waarom deed je niet",
+            "severity": 0.6
+          },
+          {
+            "stem": "had allang",
+            "severity": 0.6
+          },
+          {
+            "stem": "had al moeten",
+            "severity": 0.55
+          },
+          {
+            "stem": "doet het weer niet",
+            "severity": 0.65
+          },
+          {
+            "stem": "werkt weer niet",
+            "severity": 0.65
+          },
+          {
+            "stem": "weer stuk",
+            "severity": 0.6
+          },
+          {
+            "stem": "weer kapot",
+            "severity": 0.6
+          },
+          {
+            "stem": "dit slaat nergens op",
+            "severity": 0.7
+          },
+          {
+            "stem": "nergens op",
+            "severity": 0.6
+          },
+          {
+            "stem": "onzin",
+            "severity": 0.55
+          },
+          {
+            "stem": "flauwekul",
+            "severity": 0.55
+          },
+          {
+            "stem": "daar heb ik niks aan",
+            "severity": 0.65
+          },
+          {
+            "stem": "heb ik niks aan",
+            "severity": 0.65
+          },
+          {
+            "stem": "schiet niet op",
+            "severity": 0.6
+          },
+          {
+            "stem": "verspil",
+            "severity": 0.55
+          },
+          {
+            "stem": "tijdverspil",
+            "severity": 0.65
+          }
+        ],
+        "en": [
+          {
+            "stem": "junk",
+            "severity": 0.6
+          },
+          {
+            "stem": "mess",
+            "severity": 0.55
+          },
+          {
+            "stem": "still not done",
+            "severity": 0.7
+          },
+          {
+            "stem": "nothing happened",
+            "severity": 0.7
+          },
+          {
+            "stem": "why didn't you",
+            "severity": 0.65
+          },
+          {
+            "stem": "should have been done",
+            "severity": 0.6
+          },
+          {
+            "stem": "broken again",
+            "severity": 0.65
+          },
+          {
+            "stem": "waste of time",
+            "severity": 0.65
+          },
+          {
+            "stem": "pointless",
+            "severity": 0.55
+          },
+          {
+            "stem": "useless response",
+            "severity": 0.7
+          },
+          {
+            "stem": "not helpful",
+            "severity": 0.6
           }
         ]
       }
